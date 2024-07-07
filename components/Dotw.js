@@ -15,8 +15,9 @@ export default function Dotw({day, goal}) {
 
 const styles = StyleSheet.create({
   buttonContainer: {
-    alignContent: 'center',
+    alignContent: 'left',
     padding: 10,
+    width: '100%'
   },
   actualButton: {
     backgroundColor: '#eee',
