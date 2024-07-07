@@ -12,7 +12,8 @@ export default function App() {
     for (let i = 0; i < 7; i++) {
       week.push({
         dayOfWeek: format(currentDay, 'EEEE'),
-        date: format(currentDay, 'd')
+        date: format(currentDay, 'd'),
+        fullDate: currentDay // Add full date to compare
       });
       currentDay = addDays(currentDay, 1);
     }
@@ -22,13 +23,20 @@ export default function App() {
 
   const weekDates = generateWeekDates(new Date());
   const currentMonthYear = format(new Date(), 'MMMM yyyy'); // Get current month and year
+  const today = new Date(); // Get today's date
 
   return (
     <ScrollView showsVerticalScrollIndicator={false}>
       <View style={styles.container}>
         <Text style={styles.monthYear}>{currentMonthYear}</Text>
         {weekDates.map((day, index) => (
-          <Dotw key={index} day={day.dayOfWeek} date={day.date} goal={`Goal for ${day.dayOfWeek}`} />
+          <Dotw
+            key={index}
+            day={day.dayOfWeek}
+            date={day.date}
+            goal={`Goal for ${day.dayOfWeek}`}
+            isToday={format(day.fullDate, 'yyyy-MM-dd') === format(today, 'yyyy-MM-dd')}
+          />
         ))}
         <StatusBar style="auto" />
       </View>
