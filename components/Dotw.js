@@ -1,7 +1,24 @@
-import React from 'react';
 import { StyleSheet, Text, View, Pressable } from 'react-native';
+import React, { useState } from 'react';
+import RNPickerSelect from 'react-native-picker-select';
 
 export default function Dotw({ day, date, goal, isToday }) {
+  const [selectedGoal, setGoal] = useState(goal);
+
+  const placeholder = { //Placeholder value for unset goal
+    label: 'Select an option...',
+    value: null
+  };
+
+  const options = [     //Options for dropdown menu
+    { label: 'Arms', value: 'Arms' },
+    { label: 'Chest', value: 'Chest' },
+    { label: 'Back', value: 'Back' },
+    { label: 'Legs', value: 'Legs' },
+    { label: 'Core', value: 'Core' },
+    { label: 'Other', value: 'Other' },
+  ];
+
   return (
     <View style={styles.buttonContainer}>
       <View style={[styles.actualButton, isToday && styles.todayButton]}>
@@ -9,9 +26,12 @@ export default function Dotw({ day, date, goal, isToday }) {
           <Text style={[styles.day, isToday && styles.todayText]}>{day}</Text>
           <Text style={[styles.date, isToday && styles.todayText]}>{date}</Text>
         </View>
-        <Pressable style={styles.goal} onPress={() => alert("You pressed me")}>
-          <Text style={[styles.goalText, isToday && styles.todayText]}>{goal}</Text>
-        </Pressable>
+        <RNPickerSelect
+          placeholder = {placeholder}
+          items = {options}
+          onValueChange = {(value) => setGoal(value)}
+          value = {selectedGoal}
+         />
       </View>
     </View>
   );
