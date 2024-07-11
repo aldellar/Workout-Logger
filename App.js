@@ -56,7 +56,7 @@ export default function App() {
       week.push({
         dayOfWeek: format(currentDay, 'EEEE'),
         date: format(currentDay, 'd'),
-        fullDate: currentDay
+        fullDate: format(currentDay, 'yyyy-MM-dd')
       });
       currentDay = addDays(currentDay, 1);
     }
@@ -99,6 +99,7 @@ export default function App() {
             key={index}
             day={day.dayOfWeek}
             date={day.date}
+            fullDate={day.fullDate}
             goal={`Goal for ${day.dayOfWeek}`}
             isToday={format(day.fullDate, 'yyyy-MM-dd') === format(today, 'yyyy-MM-dd')}
             //this function is called when the user selectes a day and handles the selected
