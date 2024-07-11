@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Pressable } from 'react-native';
+import { StyleSheet, Text, View, Pressable, TouchableOpacity } from 'react-native';
 //importing this because we need to usestate and useeffect these are both for determinging
 //if the user selected something on a day
 //use effect is something that allows us to perform side effects such as data fetching in this case
@@ -7,7 +7,6 @@ import React, { useState, useEffect } from 'react';
 import RNPickerSelect from 'react-native-picker-select';
 //importing the storage methods
 import * as AsyncStorageUtils from '../utils/AsyncStorage';
-
 //added the onselect and isselcted fields for storage methods
 export default function Dotw({ day, date, fullDate, goal, isToday, onSelect, isSelected }) {
   const [selectedGoal, setGoal] = useState(goal);
@@ -65,9 +64,10 @@ export default function Dotw({ day, date, fullDate, goal, isToday, onSelect, isS
     { label: 'Core', value: 'Core' },
     { label: 'Other', value: 'Other' },
   ];
-
+ 
   return (
-    <View style={[styles.buttonContainer, isSelected && styles.selected]}>
+    
+    <View style={[styles.buttonContainer, isSelected && styles.selected]}  >
       <View style={[styles.actualButton, isToday && styles.todayButton]}>
         <View style={styles.dayDateContainer}>
           <Text style={[styles.day, isToday && styles.todayText]}>{day}</Text>
@@ -81,7 +81,7 @@ export default function Dotw({ day, date, fullDate, goal, isToday, onSelect, isS
           value={selectedGoal}
         />
       </View>
-    </View>
+    </View >
   );
 }
 
