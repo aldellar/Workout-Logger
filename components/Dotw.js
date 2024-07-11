@@ -9,7 +9,7 @@ import RNPickerSelect from 'react-native-picker-select';
 import * as AsyncStorageUtils from '../utils/AsyncStorage';
 
 //added the onselect and isselcted fields for storage methods
-export default function Dotw({ day, date, goal, isToday, onSelect, isSelected }) {
+export default function Dotw({ day, date, fullDate, goal, isToday, onSelect, isSelected }) {
   const [selectedGoal, setGoal] = useState(goal);
 
   //use effect is a hook that loads the selected goal from asyncstorage when the component mouunts
@@ -22,16 +22,19 @@ export default function Dotw({ day, date, goal, isToday, onSelect, isSelected })
     //this function has no paramaters
     const loadSelectedGoal = async () => {
       //store into saved goal using getitem function the key here is the day and the date
-      const savedGoal = await AsyncStorageUtils.getItem(`${day}-${date}`);
+      const savedGoal = await AsyncStorageUtils.getItem(fullDate);
       //if the user has set a goal for this given day we will return what the goal is
       if (savedGoal) {
-        //here we are setting the goal from the goal from storage
+        // here we are setting the goal from the goal from storage
         setGoal(savedGoal);
+      } else {
+        // If no goal is set for the date, then clear it
+        setGoal(null);
       }
     };
     loadSelectedGoal();
     //end load selected goal function declaration
-  }, [day, date]);
+  }, [fullDate]);
   //defining of handle value change a asynchronous function that has one paramter
   //value is the new goal that has been changed
   const handleValueChange = async (value) => {
@@ -40,12 +43,12 @@ export default function Dotw({ day, date, goal, isToday, onSelect, isSelected })
     setGoal(value);
     //set the items using the set item function with the key being hte day and date
     //the value being the goal
-    await AsyncStorageUtils.setItem(`${day}-${date}`, value);
+    await AsyncStorageUtils.setItem(fullDate, value);
     //on select is a callback it is called with the new selection
     if (onSelect) {
       //if onselect is defined it passed an object containing day date and goal value as an argument
       //to onselect
-      onSelect({ day, date, goal: value });
+      onSelect({ day, date, fullDate, goal: value });
     }
   };
 

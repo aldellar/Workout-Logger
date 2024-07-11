@@ -1,7 +1,7 @@
 //imported to handle state management and side effects
 import React, { useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, Button, TouchableOpacity} from 'react-native';
 import { startOfWeek, addDays, format } from 'date-fns';
 import Dotw from './components/Dotw';
 //importing all the asynchronous functions that were defined in my file
@@ -13,6 +13,9 @@ export default function App() {
   //use state of the selectedItem is initialized to null meaning it has not been selected
   const [selectedItem, setSelectedItem] = useState(null);
 
+  // State for changing the starting date of the week, initialized to current day
+  const [weekStartDate, setWeekStartDate] = useState(startOfWeek(new Date(), { weekStartsOn: 1 }));
+
   //loading the selected items using useEffect no first or second argument needed in this code
   useEffect(() => {
     //defining an asynchronous function called loadSelected item which loads the
@@ -21,7 +24,7 @@ export default function App() {
       //call the getItem function to retrieve the value associated with the key
       const item = await AsyncStorageUtils.getItem('selectedItem');
       //verify again the data validity to make sure it was actually recieved from storage
-      //so we dont estSelected item to null
+      //so we dont set selectedItem to null
       if (item) {
         //calling setSelectedItem using the value we just got from the key
         //to update the state of selected item with the retrieved item
@@ -53,7 +56,7 @@ export default function App() {
       week.push({
         dayOfWeek: format(currentDay, 'EEEE'),
         date: format(currentDay, 'd'),
-        fullDate: currentDay
+        fullDate: format(currentDay, 'yyyy-MM-dd')
       });
       currentDay = addDays(currentDay, 1);
     }
@@ -61,19 +64,42 @@ export default function App() {
     return week;
   };
 
-  const weekDates = generateWeekDates(new Date());
-  const currentMonthYear = format(new Date(), 'MMMM yyyy');
+  // weekDates starts on whatever weekStartDate is
+  const weekDates = generateWeekDates(weekStartDate);
+  const currentMonthYear = format(weekStartDate, 'MMMM yyyy');
   const today = new Date();
+
+  // Previous week function
+  const prevWeek = () => {
+    //Changes start date to 7 days earlier
+    setWeekStartDate(prevDate => addDays(prevDate, -7));
+  }
+
+  // Next week function
+  const nextWeek = () => {
+    //Changes start date to 7 days later
+    setWeekStartDate(prevDate => addDays(prevDate, 7));
+  }
+
 
   return (
     <ScrollView showsVerticalScrollIndicator={false}>
       <View style={styles.container}>
-        <Text style={styles.monthYear}>{currentMonthYear}</Text>
+        <View style={styles.header}>
+          <TouchableOpacity style={styles.button} onPress={prevWeek}>
+            <Text style={styles.buttonText}>{'<'}</Text>
+          </TouchableOpacity>
+          <Text style={styles.monthYear}>{currentMonthYear}</Text>
+          <TouchableOpacity style={styles.button} onPress={nextWeek}>
+            <Text style={styles.buttonText}>{'>'}</Text>
+          </TouchableOpacity>
+        </View>
         {weekDates.map((day, index) => (
           <Dotw
             key={index}
             day={day.dayOfWeek}
             date={day.date}
+            fullDate={day.fullDate}
             goal={`Goal for ${day.dayOfWeek}`}
             isToday={format(day.fullDate, 'yyyy-MM-dd') === format(today, 'yyyy-MM-dd')}
             //this function is called when the user selectes a day and handles the selected
@@ -97,9 +123,28 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 60
   },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+    paddingHorizontal: 20,
+    marginBottom: 10
+  },
   monthYear: {
     fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20
-  }
+    fontWeight: 'bold'
+  },
+  weekChangeButtons: {
+    flex: 1
+  },
+  button: {
+    padding: 15,
+    backgroundColor: '#a6a6a6'
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 24
+  },
+  
 });
