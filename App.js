@@ -127,6 +127,7 @@ function HomeScreen({ navigation }){
   );
 }
 
+// Tab for resistance exercises
 function ResistanceScreen() {
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -135,6 +136,7 @@ function ResistanceScreen() {
   );
 }
 
+// Tab for cardio exercises
 function CardioScreen() {
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -147,6 +149,7 @@ function CardioScreen() {
 function Logger({ route, navigation }){
   const {name} = route.params;
   return(
+    // Structure very similar to stack navigation below
     <Tab.Navigator>
       <Tab.Screen name="Resistance" component={ResistanceScreen} />
       <Tab.Screen name="Cardio" component={CardioScreen} />
