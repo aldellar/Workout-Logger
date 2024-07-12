@@ -1,8 +1,8 @@
 //imported to handle state management and side effects
 import React, { useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-native';
-import { startOfWeek, addDays, format } from 'date-fns';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, TextInput } from 'react-native';
+import { startOfWeek, addDays, format, parseISO } from 'date-fns';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
@@ -14,7 +14,7 @@ import * as AsyncStorageUtils from './utils/AsyncStorage';
 const Stack = createStackNavigator();
 const Tab = createMaterialTopTabNavigator();
 
-//added a homescreen function
+// Homescreen function page ------------------------------------------------------------------------------------------------
 function HomeScreen({ navigation }){
   //adding a state introduces a new state variable to selected item to keep track
   //of the currently selected item
@@ -75,8 +75,10 @@ function HomeScreen({ navigation }){
   // weekDates starts on whatever weekStartDate is
   const weekDates = generateWeekDates(weekStartDate);
   const currentMonthYear = format(weekStartDate, 'MMMM yyyy');
-  const today = new Date();
+  //changed to format today right on declaration
+  const today = format(new Date(), 'yyyy-MM-dd')
 
+  
   // Previous week function
   const prevWeek = () => {
     //Changes start date to 7 days earlier
@@ -111,7 +113,8 @@ function HomeScreen({ navigation }){
               date={day.date}
               fullDate={day.fullDate}
               goal={`Goal for ${day.dayOfWeek}`}
-              isToday={format(day.fullDate, 'yyyy-MM-dd') === format(today, 'yyyy-MM-dd')}
+              //error seemed to come here not parseISO'ing the day.full date caused error
+              isToday= {format(parseISO((day.fullDate)), 'yyyy-MM-dd') === today}
               //this function is called when the user selectes a day and handles the selected
               //given the current day as its argument
               onSelect={() => handleSelectItem(day)}
@@ -127,12 +130,80 @@ function HomeScreen({ navigation }){
   );
 }
 
-// Tab for resistance exercises
+// Logger function page ------------------------------------------------------------------------------------------------------
+function Logger({ route, navigation }){
+  const {name} = route.params;
+
+  // State variable workouts stores our exercises in an array
+  const [workouts, setWorkouts] = useState([]);
+
+  // Creates a new workout object(name,sets,reps) to store in our array
+  // Values in the object are initially empty
+  const addWorkout = () => {
+    setWorkouts([...workouts, { exerciseName: '', sets: '', reps: '', weight: '' }]);
+  };
+
+  // Handles when a value in a workout object is changed
+  // Creates a copy of our workout list, editing the object's value based on the index and field given
+  // Then updates our original array with setWorkouts()
+  const changeWorkout = (index, field, value) => {
+    const newWorkout = [...workouts];
+    newWorkout[index][field] = value;
+    setWorkouts(newWorkout);
+  }
+
+  
+  return(
+    // Structure very similar to stack navigation below
+    <Tab.Navigator>
+      <Tab.Screen name="Resistance" component={ResistanceScreen} />
+      <Tab.Screen name="Cardio" component={CardioScreen} />
+    </Tab.Navigator>
+  )
+
+  // Tab for resistance exercises
 function ResistanceScreen() {
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text>Weights</Text>
-    </View>
+    <ScrollView>
+      {/* Adds a new workout; appends to our array a new exercise with blank values initialized */}
+      <TouchableOpacity style={styles.addWorkoutButton} onPress={addWorkout}> 
+        <Text style={{fontSize: 36, textAlign: 'center'}}>+</Text>
+      </TouchableOpacity>
+      {/* Iterates over workouts array with the View below for each workout */}
+      {workouts.map((workout, index) => ( 
+        <View key={index} style={styles.workoutEntry}>
+          <TextInput 
+          style = {styles.input}
+          placeholder = "Enter exercise name..."
+          value = {workout.exercise}
+          onChangeText={(text) => changeWorkout(index, 'exercise', text)}
+          />
+          <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+          <TextInput 
+          style = {styles.input2}
+          placeholder = "Sets"
+          value = {workout.sets}
+          onChangeText={(text) => changeWorkout(index, 'sets', text)}
+          keyboardType = "numeric"
+          />
+          <TextInput 
+          style = {styles.input2}
+          placeholder = "Reps"
+          value = {workout.reps}
+          onChangeText={(text) => changeWorkout(index, 'reps', text)}
+          keyboardType = "numeric"
+          />
+          <TextInput 
+          style = {styles.input2}
+          placeholder = "Weight"
+          value = {workout.weight}
+          onChangeText={(text) => changeWorkout(index, 'weight', text)}
+          keyboardType = "numeric"
+          />
+          </View>
+        </View>
+      ))}
+    </ScrollView>
   );
 }
 
@@ -145,17 +216,8 @@ function CardioScreen() {
   );
 }
 
-//created the logger function page where we can start inputting things
-function Logger({ route, navigation }){
-  const {name} = route.params;
-  return(
-    // Structure very similar to stack navigation below
-    <Tab.Navigator>
-      <Tab.Screen name="Resistance" component={ResistanceScreen} />
-      <Tab.Screen name="Cardio" component={CardioScreen} />
-    </Tab.Navigator>
-  )
 }
+
 export default function App() {
   return (
     <NavigationContainer>
@@ -167,6 +229,7 @@ export default function App() {
   );
 }
 
+// Styles ----------------------------------------------------------------------------------------------------------------------
 const styles = StyleSheet.create({
   buttonContainer: {
     alignContent: 'left',
@@ -201,4 +264,37 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 24
   },
+  input: {
+    width: '100%',
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    marginBottom: 10,
+  },
+  addWorkoutButton: {
+    backgroundColor: '#a6a6a6',
+    padding: 30,
+    borderRadius: 20,
+    marginBottom: 10,
+    marginHorizontal: 10,
+    marginTop: 10
+  },
+  workoutEntry: {
+    width: '100%',
+    marginBottom: 20,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 10,
+    backgroundColor: '#f0f0f0',
+  },
+  input2: {
+    width: '30%',
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    marginBottom: 10,
+  }
 });

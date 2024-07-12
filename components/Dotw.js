@@ -1,4 +1,5 @@
 import { StyleSheet, Text, View, Pressable, TouchableOpacity } from 'react-native';
+
 //importing this because we need to usestate and useeffect these are both for determinging
 //if the user selected something on a day
 //use effect is something that allows us to perform side effects such as data fetching in this case
@@ -8,9 +9,10 @@ import RNPickerSelect from 'react-native-picker-select';
 //importing the storage methods
 import * as AsyncStorageUtils from '../utils/AsyncStorage';
 //added the onselect and isselcted fields for storage methods
-export default function Dotw({ day, date, fullDate, goal, isToday, onSelect, isSelected }) {
+//removed the is today boolean passed by the function seemed to have issues with this and the date instead found is today in the dotw function.
+export default function Dotw({ day, date, fullDate, goal, isToday,  onSelect, isSelected }) {
   const [selectedGoal, setGoal] = useState(goal);
-
+ 
   //use effect is a hook that loads the selected goal from asyncstorage when the component mouunts
   //or the day or date changes
   //an effect is something outside the scope of the fuction component such as data fetching
