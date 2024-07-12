@@ -5,11 +5,14 @@ import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-nati
 import { startOfWeek, addDays, format } from 'date-fns';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
+import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+
 import Dotw from './components/Dotw';
 //importing all the asynchronous functions that were defined in my file
 import * as AsyncStorageUtils from './utils/AsyncStorage';
 //create the navigation stack
 const Stack = createStackNavigator();
+const Tab = createMaterialTopTabNavigator();
 
 //added a homescreen function
 function HomeScreen({ navigation }){
@@ -124,16 +127,33 @@ function HomeScreen({ navigation }){
   );
 }
 
+// Tab for resistance exercises
+function ResistanceScreen() {
+  return (
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <Text>Weights</Text>
+    </View>
+  );
+}
+
+// Tab for cardio exercises
+function CardioScreen() {
+  return (
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <Text>Cardio</Text>
+    </View>
+  );
+}
+
 //created the logger function page where we can start inputting things
 function Logger({ route, navigation }){
   const {name} = route.params;
   return(
-    <View style={styles.button}>
-      <Text style={styles.title}>{name}</Text>
-      <TouchableOpacity style={styles.button} onPress={() => navigation.goBack()}>
-        <Text style={styles.buttonText}>Go Back</Text>
-      </TouchableOpacity>
-    </View>
+    // Structure very similar to stack navigation below
+    <Tab.Navigator>
+      <Tab.Screen name="Resistance" component={ResistanceScreen} />
+      <Tab.Screen name="Cardio" component={CardioScreen} />
+    </Tab.Navigator>
   )
 }
 export default function App() {
