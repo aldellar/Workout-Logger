@@ -162,12 +162,7 @@ function Logger({ route, navigation }) {
       try {
         const storedWorkouts = await AsyncStorageUtils.getItem(`workouts-${fullDate}`);
         if (storedWorkouts) {
-          const parsedWorkouts = JSON.parse(storedWorkouts);
-          if (Array.isArray(parsedWorkouts)) {
-            setWorkouts(parsedWorkouts);
-          } else {
-            setWorkouts([]);
-          }
+          setWorkouts(JSON.parse(storedWorkouts));          // Set to retrieved workout
         }
       } catch (error) {
         console.error('Failed to load workouts:', error);
@@ -178,7 +173,7 @@ function Logger({ route, navigation }) {
       try {
         const storedPRs = await AsyncStorageUtils.getItem('prs');
         if (storedPRs) {
-          setPRs(JSON.parse(storedPRs));
+          setPRs(JSON.parse(storedPRs));                    // Set to retrieved PRs
         }
       } catch (error) {
         console.error('Failed to load PRs:', error);
@@ -209,7 +204,7 @@ function Logger({ route, navigation }) {
 
     saveWorkouts();
     savePRs();
-  }, [workouts, prs]);
+  }, [workouts, fullDate, prs]);
 
   // Creates a new workout object (exerciseName, sets, reps, weight) to store in our array
   const addWorkout = () => {
@@ -245,6 +240,7 @@ function Logger({ route, navigation }) {
     setWorkouts(newWorkouts);
   };
 
+  // Tab manager
   return (
     <Tab.Navigator>
       <Tab.Screen name="Resistance" component={ResistanceScreen} />
