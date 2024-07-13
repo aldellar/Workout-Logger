@@ -28,8 +28,6 @@ function HomeScreen({ navigation }){
   //of the currently selected item
   //use state of the selectedItem is initialized to null meaning it has not been selected
   const [selectedItem, setSelectedItem] = useState(null);
-  // State for changing the starting date of the week, initialized to current day
-  const [weekStartDate, setWeekStartDate] = useState(startOfWeek(new Date(), { weekStartsOn: 1 }));
 
   //loading the selected items using useEffect no first or second argument needed in this code
   useEffect(() => {
@@ -63,13 +61,17 @@ function HomeScreen({ navigation }){
   }
   //end handle select item function
 
+
+
+  // State for changing the starting date of the week, initialized to current day
+  const [weekStartDate, setWeekStartDate] = useState(startOfWeek(new Date(), { weekStartsOn: 1 }));
+
   const generateWeekDates = (startDate) => {
     let week = [];
     let currentDay = startOfWeek(startDate, { weekStartsOn: 1 });   // Calendar starts on Monday (1)
 
     for (let i = 0; i < 7; i++) {
       week.push({
-        id: `${format(currentDay, 'yyyy-MM-dd')}-${i}`, // Add a unique id to each day object
         dayOfWeek: format(currentDay, 'EEEE'),
         date: format(currentDay, 'd'),
         fullDate: format(currentDay, 'yyyy-MM-dd')
@@ -106,16 +108,18 @@ function HomeScreen({ navigation }){
           </TouchableOpacity>
         </View>
 
-        {weekDates.map((day) => (
-        <TouchableOpacity key={day.id} style={styles.buttonContainer} onPress={() => navigation.navigate('Logger', { name: 'Logger' })}>
+        {weekDates.map((day, index) => (
+          <TouchableOpacity
+            key = {index}
+            style = {styles.buttonContainer}
+            onPress = {() => navigation.navigate('Logger', { name: 'Logger' })}
+          >
             <Dotw
               day = {day.dayOfWeek}
               date = {day.date}
               fullDate = {day.fullDate}
               goal = {`Goal for ${day.dayOfWeek}`}
               isToday = {day.fullDate === today}
-              onSelect={() => handleSelectItem(day)}
-              isSelected={selectedItem && selectedItem.fullDate === day.fullDate}
             />
         </TouchableOpacity>
         ))}
