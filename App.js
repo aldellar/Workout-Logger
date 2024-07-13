@@ -130,25 +130,52 @@ function HomeScreen({ navigation }){
  */
 
 function Logger({ route, navigation }){
-  const {name} = route.params;
+  const { name, fullDate } = route.params;
 
   // State variable workouts stores our exercises in an array
   const [workouts, setWorkouts] = useState([]);
 
+  // Load workouts from AsyncStorage when the component mounts
+  useEffect(() => {
+    const loadWorkouts = async () => {
+      try {
+        const storedWorkouts = await AsyncStorageUtils.getItem(`workouts-${fullDate}`);
+        // if there is an actual workout then we call setWorkouts to add to workouts array
+        if (storedWorkouts) {
+          setWorkouts(JSON.parse(storedWorkouts));
+        }
+      } catch (error) {
+        console.error('Failed to load workouts:', error);
+      }
+    };
+
+    loadWorkouts();
+  }, [fullDate]);
+
+  // Save workouts to AsyncStorage whenever they change
+  useEffect(() => {
+    const saveWorkouts = async () => {
+      try {
+        await AsyncStorageUtils.setItem(`workouts-${fullDate}`, JSON.stringify(workouts));
+      } catch (error) {
+        console.error('Failed to save workouts:', error);
+      }
+    };
+    saveWorkouts();
+  }, [workouts, fullDate]);
+
   // Creates a new workout object(name,sets,reps) to store in our array
-  // Values in the object are initially empty
   const addWorkout = () => {
     setWorkouts([...workouts, { exerciseName: '', sets: '', reps: '', weight: '' }]);
   };
 
   // Handles when a value in a workout object is changed
-  // Creates a copy of our workout list, editing the object's value based on the index and field given
-  // Then updates our original array with setWorkouts()
   const changeWorkout = (index, field, value) => {
-    const newWorkout = [...workouts];
-    newWorkout[index][field] = value;
-    setWorkouts(newWorkout);
-  }
+    const newWorkouts = [...workouts];
+    newWorkouts[index][field] = value;
+    setWorkouts(newWorkouts);
+  };
+
 
   
   return(
