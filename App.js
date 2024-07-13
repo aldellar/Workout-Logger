@@ -1,3 +1,9 @@
+/*
+ * =================================================================================================
+ * DEPENDENCIES
+ * =================================================================================================
+ */
+
 // Import packages
 import React, { useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
@@ -24,70 +30,60 @@ const Tab = createMaterialTopTabNavigator();
  */
 
 function HomeScreen({ navigation }){
-  // State to track the currently selected item
+
+  // Use state to track the currently selected item
   const [selectedItem, setSelectedItem] = useState(null);
 
-  // State to change starting date of the week, initialized to the most recent Monday
+  // Use state to change starting date of the week, initialized to the most recent Monday
   const [weekStartDate, setWeekStartDate] = useState(startOfWeek(new Date(), { weekStartsOn: 1 }));
 
   // Load the selected item from async storage when the component mounts
   useEffect(() => {
-    //defining an asynchronous function called loadSelected item which loads the
-    //selected item from asynchronous starge this function has no parameters
     const loadSelectedItem = async () => {
-      //call the getItem function to retrieve the value associated with the key
-      const item = await AsyncStorageUtils.getItem('selectedItem');
-      //verify again the data validity to make sure it was actually recieved from storage
-      //so we dont set selectedItem to null
+      const item = await AsyncStorageUtils.getItem('selectedItem');   // Retrieve the value associated with the key
       if (item) {
-        //calling setSelectedItem using the value we just got from the key
-        //to update the state of selected item with the retrieved item
-        //basically this is returning if the user selected a thing from the dropdown menu
-        //the actual item itself
-        setSelectedItem(item);
+        setSelectedItem(item);                                        // Update state with the retrieved item
       }
     };
     loadSelectedItem();
-  }, []);
+  }, []);                                                             // Runs only once when the component mounts
 
   // Handle item selection
   const handleSelectItem = async (item) => {
-    //given them it calls set selected item function to update the state with the new value item
-    //this is an updater function returned by the use state hoo
-    setSelectedItem(item);
-    //storing the selected item in the async storaage as selected item
-    await AsyncStorageUtils.setItem('selectedItem', item);
+    setSelectedItem(item);                                    // Update selected item
+    await AsyncStorageUtils.setItem('selectedItem', item);    // Store selected item in async storage
   }
 
   // Generate week dates starting from a given date
   const generateWeekDates = (startDate) => {
     let week = [];
-    let currentDay = startDate;
+    let currentDate = startDate;
 
     for (let i = 0; i < 7; i++) {
       week.push({
-        dayOfWeek: format(currentDay, 'EEEE'),
-        date: format(currentDay, 'd'),
-        fullDate: format(currentDay, 'yyyy-MM-dd')
+        dayOfWeek: format(currentDate, 'EEEE'),
+        date: format(currentDate, 'd'),
+        fullDate: format(currentDate, 'yyyy-MM-dd')
       });
-      currentDay = addDays(currentDay, 1);
+      currentDate = addDays(currentDate, 1);
     }
 
     return week;
   };
 
+  // Generate the dates for the current week, format the dates
   const weekDates = generateWeekDates(weekStartDate);
   const currentMonthYear = format(weekStartDate, 'MMMM yyyy');
   const today = format(new Date(), 'yyyy-MM-dd')
 
-  // Calculate previous week dates by changing start date to 7 days earlier
+  // Function to calculate previous week dates
   const prevWeek = () => {
-    setWeekStartDate(currentStartDate => addDays(currentStartDate, -7));
+    setWeekStartDate(currentDate => addDays(currentDate, -7));  // Shift the start date to 7 days earlier
   }
 
-  // Calculate next week dates by changing start date to 7 days later
+  // Function to calculate next week dates
   const nextWeek = () => {
-    setWeekStartDate(currentStartDate => addDays(currentStartDate, 7));
+    setWeekStartDate(currentDate => addDays(currentDate, 7));   // Shift the start date to 7 days later
   }
 
   // Render the UI
@@ -163,9 +159,6 @@ function Logger({ route, navigation }){
     </Tab.Navigator>
   )
 
-
-// ------------------------------------------------------------------------------------------------
-
 function ResistanceScreen() {
   return (
     <ScrollView>
@@ -211,8 +204,6 @@ function ResistanceScreen() {
   );
 }
 
-// ------------------------------------------------------------------------------------------------
-
 function CardioScreen() {
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -233,7 +224,6 @@ export default function App() {
     </NavigationContainer>
   );
 }
-
 
 /*
  * =================================================================================================
