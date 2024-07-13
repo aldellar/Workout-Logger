@@ -19,17 +19,35 @@ import Dotw from './components/Dotw';
 // Import utilities
 import * as AsyncStorageUtils from './utils/AsyncStorage';
 
-// Create the navigation stack
-const Stack = createStackNavigator();
-const Tab = createMaterialTopTabNavigator();
-
 /*
  * =================================================================================================
- * HOME SCREEN PAGE
+ * APP MANAGEMENT
  * =================================================================================================
  */
 
-function HomeScreen({ navigation }){
+// Create the stack and tab navigators
+const Stack = createStackNavigator();
+const Tab = createMaterialTopTabNavigator();
+
+// Stack manager component
+export default function App() {
+  return (
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName="Home">
+        <Stack.Screen name="Home" component={Home} />
+        <Stack.Screen name="Logger" component={Logger} />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+}
+
+/*
+ * =================================================================================================
+ * HOME PAGE
+ * =================================================================================================
+ */
+
+function Home({ navigation }){
 
   // Use state to track the currently selected item
   const [selectedItem, setSelectedItem] = useState(null);
@@ -186,70 +204,59 @@ function Logger({ route, navigation }){
     </Tab.Navigator>
   )
 
-function ResistanceScreen() {
-  return (
-    <ScrollView>
-      {/* Adds a new workout; appends to our array a new exercise with blank values initialized */}
-      <TouchableOpacity style={styles.addWorkoutButton} onPress={addWorkout}> 
-        <Text style={{fontSize: 36, textAlign: 'center'}}>+</Text>
-      </TouchableOpacity>
-      {/* Iterates over workouts array with the View below for each workout */}
-      {workouts.map((workout, index) => ( 
-        <View key={index} style={styles.workoutEntry}>
-          <TextInput 
-          style = {styles.input}
-          placeholder = "Enter exercise name..."
-          value = {workout.exercise}
-          onChangeText={(text) => changeWorkout(index, 'exercise', text)}
-          />
-          <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-          <TextInput 
-          style = {styles.input2}
-          placeholder = "Sets"
-          value = {workout.sets}
-          onChangeText={(text) => changeWorkout(index, 'sets', text)}
-          keyboardType = "numeric"
-          />
-          <TextInput 
-          style = {styles.input2}
-          placeholder = "Reps"
-          value = {workout.reps}
-          onChangeText={(text) => changeWorkout(index, 'reps', text)}
-          keyboardType = "numeric"
-          />
-          <TextInput 
-          style = {styles.input2}
-          placeholder = "Weight"
-          value = {workout.weight}
-          onChangeText={(text) => changeWorkout(index, 'weight', text)}
-          keyboardType = "numeric"
-          />
+  function ResistanceScreen() {
+    return (
+      <ScrollView>
+        {/* Adds a new workout; appends to our array a new exercise with blank values initialized */}
+        <TouchableOpacity style={styles.addWorkoutButton} onPress={addWorkout}>
+          <Text style={{fontSize: 36, textAlign: 'center'}}>+</Text>
+        </TouchableOpacity>
+        {/* Iterates over workouts array with the View below for each workout */}
+        {workouts.map((workout, index) => (
+          <View key={index} style={styles.workoutEntry}>
+            <TextInput
+            style = {styles.input}
+            placeholder = "Enter exercise name..."
+            value = {workout.exercise}
+            onChangeText={(text) => changeWorkout(index, 'exercise', text)}
+            />
+            <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+            <TextInput
+            style = {styles.input2}
+            placeholder = "Sets"
+            value = {workout.sets}
+            onChangeText={(text) => changeWorkout(index, 'sets', text)}
+            keyboardType = "numeric"
+            />
+            <TextInput
+            style = {styles.input2}
+            placeholder = "Reps"
+            value = {workout.reps}
+            onChangeText={(text) => changeWorkout(index, 'reps', text)}
+            keyboardType = "numeric"
+            />
+            <TextInput
+            style = {styles.input2}
+            placeholder = "Weight"
+            value = {workout.weight}
+            onChangeText={(text) => changeWorkout(index, 'weight', text)}
+            keyboardType = "numeric"
+            />
+            </View>
           </View>
-        </View>
-      ))}
-    </ScrollView>
-  );
-}
+        ))}
+      </ScrollView>
+    );
+  }
 
-function CardioScreen() {
-  return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text>Cardio</Text>
-    </View>
-  );
-}
+  function CardioScreen() {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <Text>Cardio</Text>
+      </View>
+    );
+  }
 
-}
-
-export default function App() {
-  return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="Home">
-        <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="Logger" component={Logger} />
-      </Stack.Navigator>
-    </NavigationContainer>
-  );
 }
 
 /*
