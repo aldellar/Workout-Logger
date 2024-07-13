@@ -65,7 +65,7 @@ function HomeScreen({ navigation }){
 
   const generateWeekDates = (startDate) => {
     let week = [];
-    let currentDay = startOfWeek(startDate, { weekStartsOn: 1 });
+    let currentDay = startOfWeek(startDate, { weekStartsOn: 1 });   // Calendar starts on Monday (1)
 
     for (let i = 0; i < 7; i++) {
       week.push({
@@ -83,21 +83,19 @@ function HomeScreen({ navigation }){
   const weekDates = generateWeekDates(weekStartDate);
   const currentMonthYear = format(weekStartDate, 'MMMM yyyy');
   const today = format(new Date(), 'yyyy-MM-dd')
-  
-  // Previous week function
+
   const prevWeek = () => {
     setWeekStartDate(prevDate => addDays(prevDate, -7));  // Changes start date to 7 days earlier
   }
 
-  // Next week function
   const nextWeek = () => {
     setWeekStartDate(prevDate => addDays(prevDate, 7));  // Changes start date to 7 days later
   }
 
-
   return (
     <ScrollView showsVerticalScrollIndicator={false}>
       <View style={styles.container}>
+
         <View style={styles.header}>
           <TouchableOpacity style={styles.button} onPress={prevWeek}>
             <Text style={styles.buttonText}>{'<'}</Text>
@@ -107,26 +105,21 @@ function HomeScreen({ navigation }){
             <Text style={styles.buttonText}>{'>'}</Text>
           </TouchableOpacity>
         </View>
+
         {weekDates.map((day) => (
-        //EXAMPLE OF HOW TO CALL A FUNCTION TO A DIFFERENT HOMESCREEN
-        //added touchable days of the week to navigate to logger screen
-         <TouchableOpacity key={day.id} style={styles.buttonContainer} onPress={() => navigation.navigate('Logger', { name: 'Logger' })}>
+        <TouchableOpacity key={day.id} style={styles.buttonContainer} onPress={() => navigation.navigate('Logger', { name: 'Logger' })}>
             <Dotw
-              day={day.dayOfWeek}
-              date={day.date}
-              fullDate={day.fullDate}
-              goal={`Goal for ${day.dayOfWeek}`}
-              //error seemed to come here not parseISO'ing the day.full date caused error
-              isToday= {format(parseISO((day.fullDate)), 'yyyy-MM-dd') === today}
-              //this function is called when the user selectes a day and handles the selected
-              //given the current day as its argument
+              day = {day.dayOfWeek}
+              date = {day.date}
+              fullDate = {day.fullDate}
+              goal = {`Goal for ${day.dayOfWeek}`}
+              isToday = {day.fullDate === today}
               onSelect={() => handleSelectItem(day)}
-              //this is the current state that holds the selected item
-              //sets if it is selected so we know to display it
               isSelected={selectedItem && selectedItem.fullDate === day.fullDate}
             />
         </TouchableOpacity>
         ))}
+
         <StatusBar style="auto" />
       </View>
     </ScrollView>
