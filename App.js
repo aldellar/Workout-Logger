@@ -147,13 +147,13 @@ function Home({ navigation }){
  * =================================================================================================
  */
 
-function Logger({ route, navigation }){
+function Logger({ route, navigation }) {
   const { name, fullDate } = route.params;
 
   // State variable workouts stores our exercises in an array
   const [workouts, setWorkouts] = useState([]);
 
-  // Use state to track personal record (PRs)
+  // Use state to track personal records (PRs)
   const [prs, setPRs] = useState({});
 
   // Load workouts and PRs from async storage when the component mounts
@@ -162,16 +162,21 @@ function Logger({ route, navigation }){
       try {
         const storedWorkouts = await AsyncStorageUtils.getItem(`workouts-${fullDate}`);
         if (storedWorkouts) {
-          setWorkouts(JSON.parse(storedWorkouts));
+          const parsedWorkouts = JSON.parse(storedWorkouts);
+          if (Array.isArray(parsedWorkouts)) {
+            setWorkouts(parsedWorkouts);
+          } else {
+            setWorkouts([]);
+          }
         }
       } catch (error) {
         console.error('Failed to load workouts:', error);
       }
     };
 
-   const loadPRs = async () => {
+    const loadPRs = async () => {
       try {
-        const storedPRs = await AsyncStorageUtils.getItem(`prs`);
+        const storedPRs = await AsyncStorageUtils.getItem('prs');
         if (storedPRs) {
           setPRs(JSON.parse(storedPRs));
         }
@@ -206,7 +211,7 @@ function Logger({ route, navigation }){
     savePRs();
   }, [workouts, prs]);
 
-  // Creates a new workout object(name,sets,reps) to store in our array
+  // Creates a new workout object (exerciseName, sets, reps, weight) to store in our array
   const addWorkout = () => {
     setWorkouts([...workouts, { exerciseName: '', sets: '', reps: '', weight: '' }]);
   };
@@ -216,14 +221,21 @@ function Logger({ route, navigation }){
     const newWorkouts = [...workouts];
     newWorkouts[index][field] = value;
 
+    const exerciseName = newWorkouts[index].exerciseName;
+    const currentPR = prs[exerciseName] || { weight: 0, reps: 0 };
+
+    const weight = parseInt(newWorkouts[index].weight, 10);
+    const reps = parseInt(newWorkouts[index].reps, 10);
+
     // New resistance PR has been set if either...
-    if ( weight > currentPR.weight ||                             // New weight > current PR's weight OR
-       (weight = currentPR.weight && reps > currentPR.reps)) {    // New weight = PR's weight but there were more reps
+    if (weight > currentPR.weight ||                             // New weight > current PR's weight OR
+       (weight === currentPR.weight && reps > currentPR.reps)) { // New weight = PR's weight but there were more reps
       setPRs({
         ...prs,
         [exerciseName]: {
           weight: newWorkouts[index].weight,
-          reps: newWorkouts[index].reps }
+          reps: newWorkouts[index].reps
+        }
       });
       newWorkouts[index].pr = true;
     } else {
@@ -232,54 +244,54 @@ function Logger({ route, navigation }){
 
     setWorkouts(newWorkouts);
   };
-  
-  return(
-    // Structure very similar to stack navigation below
+
+  return (
     <Tab.Navigator>
       <Tab.Screen name="Resistance" component={ResistanceScreen} />
       <Tab.Screen name="Cardio" component={CardioScreen} />
     </Tab.Navigator>
-  )
+  );
 
   function ResistanceScreen() {
     return (
       <ScrollView>
         {/* Adds a new workout; appends to our array a new exercise with blank values initialized */}
         <TouchableOpacity style={styles.addWorkoutButton} onPress={addWorkout}>
-          <Text style={{fontSize: 36, textAlign: 'center'}}>+</Text>
+          <Text style={{ fontSize: 36, textAlign: 'center' }}>+</Text>
         </TouchableOpacity>
         {/* Iterates over workouts array with the View below for each workout */}
         {workouts.map((workout, index) => (
           <View key={index} style={styles.workoutEntry}>
             <TextInput
-            style = {styles.input}
-            placeholder = "Enter exercise name..."
-            value = {workout.exercise}
-            onChangeText={(text) => changeWorkout(index, 'exercise', text)}
+              style={styles.input}
+              placeholder="Enter exercise name..."
+              value={workout.exerciseName}
+              onChangeText={(text) => handleValueChange(index, 'exerciseName', text)}
             />
-            <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-            <TextInput
-            style = {styles.input2}
-            placeholder = "Sets"
-            value = {workout.sets}
-            onChangeText={(text) => changeWorkout(index, 'sets', text)}
-            keyboardType = "numeric"
-            />
-            <TextInput
-            style = {styles.input2}
-            placeholder = "Reps"
-            value = {workout.reps}
-            onChangeText={(text) => changeWorkout(index, 'reps', text)}
-            keyboardType = "numeric"
-            />
-            <TextInput
-            style = {styles.input2}
-            placeholder = "Weight"
-            value = {workout.weight}
-            onChangeText={(text) => changeWorkout(index, 'weight', text)}
-            keyboardType = "numeric"
-            />
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+              <TextInput
+                style={styles.input2}
+                placeholder="Sets"
+                value={workout.sets}
+                onChangeText={(text) => handleValueChange(index, 'sets', text)}
+                keyboardType="numeric"
+              />
+              <TextInput
+                style={styles.input2}
+                placeholder="Reps"
+                value={workout.reps}
+                onChangeText={(text) => handleValueChange(index, 'reps', text)}
+                keyboardType="numeric"
+              />
+              <TextInput
+                style={styles.input2}
+                placeholder="Weight"
+                value={workout.weight}
+                onChangeText={(text) => handleValueChange(index, 'weight', text)}
+                keyboardType="numeric"
+              />
             </View>
+            {workout.pr && <Text style={styles.prBadge}>PR!</Text>}
           </View>
         ))}
       </ScrollView>
@@ -293,7 +305,6 @@ function Logger({ route, navigation }){
       </View>
     );
   }
-
 }
 
 /*
