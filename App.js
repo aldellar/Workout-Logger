@@ -1,4 +1,4 @@
-// Imported packages
+// Import packages
 import React, { useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, TextInput } from 'react-native';
@@ -24,12 +24,13 @@ const Tab = createMaterialTopTabNavigator();
  */
 
 function HomeScreen({ navigation }){
-  //adding a state introduces a new state variable to selected item to keep track
-  //of the currently selected item
-  //use state of the selectedItem is initialized to null meaning it has not been selected
+  // State to track the currently selected item
   const [selectedItem, setSelectedItem] = useState(null);
 
-  //loading the selected items using useEffect no first or second argument needed in this code
+  // State to change starting date of the week, initialized to the most recent Monday
+  const [weekStartDate, setWeekStartDate] = useState(startOfWeek(new Date(), { weekStartsOn: 1 }));
+
+  // Load the selected item from async storage when the component mounts
   useEffect(() => {
     //defining an asynchronous function called loadSelected item which loads the
     //selected item from asynchronous starge this function has no parameters
@@ -41,17 +42,15 @@ function HomeScreen({ navigation }){
       if (item) {
         //calling setSelectedItem using the value we just got from the key
         //to update the state of selected item with the retrieved item
-        //basically this is returning if the user selected a thing from the dropdown menu 
+        //basically this is returning if the user selected a thing from the dropdown menu
         //the actual item itself
         setSelectedItem(item);
       }
     };
-    //end load selected item function declaration
     loadSelectedItem();
   }, []);
 
-  //defining the handleSelected item function it is an aysnchronous funciton
-  //it takes in one paramter named item which is representing the item being selected
+  // Handle item selection
   const handleSelectItem = async (item) => {
     //given them it calls set selected item function to update the state with the new value item
     //this is an updater function returned by the use state hoo
@@ -59,16 +58,11 @@ function HomeScreen({ navigation }){
     //storing the selected item in the async storaage as selected item
     await AsyncStorageUtils.setItem('selectedItem', item);
   }
-  //end handle select item function
 
-
-
-  // State for changing the starting date of the week, initialized to current day
-  const [weekStartDate, setWeekStartDate] = useState(startOfWeek(new Date(), { weekStartsOn: 1 }));
-
+  // Generate week dates starting from a given date
   const generateWeekDates = (startDate) => {
     let week = [];
-    let currentDay = startOfWeek(startDate, { weekStartsOn: 1 });   // Calendar starts on Monday (1)
+    let currentDay = startDate;
 
     for (let i = 0; i < 7; i++) {
       week.push({
@@ -86,14 +80,17 @@ function HomeScreen({ navigation }){
   const currentMonthYear = format(weekStartDate, 'MMMM yyyy');
   const today = format(new Date(), 'yyyy-MM-dd')
 
+  // Calculate previous week dates by changing start date to 7 days earlier
   const prevWeek = () => {
-    setWeekStartDate(prevDate => addDays(prevDate, -7));  // Changes start date to 7 days earlier
+    setWeekStartDate(currentStartDate => addDays(currentStartDate, -7));
   }
 
+  // Calculate next week dates by changing start date to 7 days later
   const nextWeek = () => {
-    setWeekStartDate(prevDate => addDays(prevDate, 7));  // Changes start date to 7 days later
+    setWeekStartDate(currentStartDate => addDays(currentStartDate, 7));
   }
 
+  // Render the UI
   return (
     <ScrollView showsVerticalScrollIndicator={false}>
       <View style={styles.container}>
@@ -121,7 +118,7 @@ function HomeScreen({ navigation }){
               goal = {`Goal for ${day.dayOfWeek}`}
               isToday = {day.fullDate === today}
             />
-        </TouchableOpacity>
+          </TouchableOpacity>
         ))}
 
         <StatusBar style="auto" />
