@@ -1,4 +1,4 @@
-//imported to handle state management and side effects
+// Imported packages
 import React, { useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, TextInput } from 'react-native';
@@ -7,14 +7,22 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 
+// Import components
 import Dotw from './components/Dotw';
-//importing all the asynchronous functions that were defined in my file
+
+// Import utilities
 import * as AsyncStorageUtils from './utils/AsyncStorage';
-//create the navigation stack
+
+// Create the navigation stack
 const Stack = createStackNavigator();
 const Tab = createMaterialTopTabNavigator();
 
-// Homescreen function page ------------------------------------------------------------------------------------------------
+/*
+ * =================================================================================================
+ * HOME SCREEN PAGE
+ * =================================================================================================
+ */
+
 function HomeScreen({ navigation }){
   //adding a state introduces a new state variable to selected item to keep track
   //of the currently selected item
@@ -72,23 +80,18 @@ function HomeScreen({ navigation }){
     return week;
   };
 
-  // weekDates starts on whatever weekStartDate is
   const weekDates = generateWeekDates(weekStartDate);
   const currentMonthYear = format(weekStartDate, 'MMMM yyyy');
-  //changed to format today right on declaration
   const today = format(new Date(), 'yyyy-MM-dd')
-
   
   // Previous week function
   const prevWeek = () => {
-    //Changes start date to 7 days earlier
-    setWeekStartDate(prevDate => addDays(prevDate, -7));
+    setWeekStartDate(prevDate => addDays(prevDate, -7));  // Changes start date to 7 days earlier
   }
 
   // Next week function
   const nextWeek = () => {
-    //Changes start date to 7 days later
-    setWeekStartDate(prevDate => addDays(prevDate, 7));
+    setWeekStartDate(prevDate => addDays(prevDate, 7));  // Changes start date to 7 days later
   }
 
 
@@ -130,7 +133,12 @@ function HomeScreen({ navigation }){
   );
 }
 
-// Logger function page ------------------------------------------------------------------------------------------------------
+/*
+ * =================================================================================================
+ * LOGGER PAGE
+ * =================================================================================================
+ */
+
 function Logger({ route, navigation }){
   const {name} = route.params;
 
@@ -161,7 +169,9 @@ function Logger({ route, navigation }){
     </Tab.Navigator>
   )
 
-  // Tab for resistance exercises
+
+// ------------------------------------------------------------------------------------------------
+
 function ResistanceScreen() {
   return (
     <ScrollView>
@@ -207,7 +217,8 @@ function ResistanceScreen() {
   );
 }
 
-// Tab for cardio exercises
+// ------------------------------------------------------------------------------------------------
+
 function CardioScreen() {
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -229,7 +240,13 @@ export default function App() {
   );
 }
 
-// Styles ----------------------------------------------------------------------------------------------------------------------
+
+/*
+ * =================================================================================================
+ * STYLES
+ * =================================================================================================
+ */
+
 const styles = StyleSheet.create({
   buttonContainer: {
     alignContent: 'left',
