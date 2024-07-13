@@ -153,12 +153,14 @@ function Logger({ route, navigation }){
   // State variable workouts stores our exercises in an array
   const [workouts, setWorkouts] = useState([]);
 
-  // Load workouts from AsyncStorage when the component mounts
+  // Use state to track personal record (PRs)
+  const [prs, setPRs] = useState({});
+
+  // Load workouts and PRs from async storage when the component mounts
   useEffect(() => {
     const loadWorkouts = async () => {
       try {
         const storedWorkouts = await AsyncStorageUtils.getItem(`workouts-${fullDate}`);
-        // if there is an actual workout then we call setWorkouts to add to workouts array
         if (storedWorkouts) {
           setWorkouts(JSON.parse(storedWorkouts));
         }
@@ -167,10 +169,22 @@ function Logger({ route, navigation }){
       }
     };
 
+   const loadPRs = async () => {
+      try {
+        const storedPRs = await AsyncStorageUtils.getItem(`prs`);
+        if (storedWorkouts) {
+          setWorkouts(JSON.parse(storedPRs));
+        }
+      } catch (error) {
+        console.error('Failed to load PRs:', error);
+      }
+    };
+
     loadWorkouts();
+    loadPRs();
   }, [fullDate]);
 
-  // Save workouts to AsyncStorage whenever they change
+  // Save workouts and PRs to async storage whenever they change
   useEffect(() => {
     const saveWorkouts = async () => {
       try {
@@ -179,8 +193,18 @@ function Logger({ route, navigation }){
         console.error('Failed to save workouts:', error);
       }
     };
+
+    const savePRs = async () => {
+      try {
+        await AsyncStorageUtils.setItem(`workouts-${fullDate}`, JSON.stringify(prs));
+      } catch (error) {
+        console.error('Failed to save PRs:', error);
+      }
+    };
+
     saveWorkouts();
-  }, [workouts, fullDate]);
+    savePRs();
+  }, [workouts, fullDate, prs]);
 
   // Creates a new workout object(name,sets,reps) to store in our array
   const addWorkout = () => {
@@ -191,6 +215,18 @@ function Logger({ route, navigation }){
   const changeWorkout = (index, field, value) => {
     const newWorkouts = [...workouts];
     newWorkouts[index][field] = value;
+
+    // Calculate if resistance PR has been achieved
+    if ((field === 'reps') &&
+        (weight >= currentPR.weight) &&
+        (value > currentPR.reps)
+    {
+      setPRs({ ...prs, [exerciseName]: { weight: newWorkouts[index].weight, reps: newWorkouts[index].reps } });
+      newWorkouts[index].pr = true;
+    } else {
+      newWorkouts[index].pr = false;
+    }
+
     setWorkouts(newWorkouts);
   };
 
