@@ -172,8 +172,8 @@ function Logger({ route, navigation }){
    const loadPRs = async () => {
       try {
         const storedPRs = await AsyncStorageUtils.getItem(`prs`);
-        if (storedWorkouts) {
-          setWorkouts(JSON.parse(storedPRs));
+        if (storedPRs) {
+          setPRs(JSON.parse(storedPRs));
         }
       } catch (error) {
         console.error('Failed to load PRs:', error);
@@ -196,7 +196,7 @@ function Logger({ route, navigation }){
 
     const savePRs = async () => {
       try {
-        await AsyncStorageUtils.setItem(`workouts-${fullDate}`, JSON.stringify(prs));
+        await AsyncStorageUtils.setItem('prs', JSON.stringify(prs));
       } catch (error) {
         console.error('Failed to save PRs:', error);
       }
@@ -204,7 +204,7 @@ function Logger({ route, navigation }){
 
     saveWorkouts();
     savePRs();
-  }, [workouts, fullDate, prs]);
+  }, [workouts, prs]);
 
   // Creates a new workout object(name,sets,reps) to store in our array
   const addWorkout = () => {
@@ -212,16 +212,19 @@ function Logger({ route, navigation }){
   };
 
   // Handles when a value in a workout object is changed
-  const changeWorkout = (index, field, value) => {
+  const handleValueChange = (index, field, value) => {
     const newWorkouts = [...workouts];
     newWorkouts[index][field] = value;
 
-    // Calculate if resistance PR has been achieved
-    if ((field === 'reps') &&
-        (weight >= currentPR.weight) &&
-        (value > currentPR.reps)
-    {
-      setPRs({ ...prs, [exerciseName]: { weight: newWorkouts[index].weight, reps: newWorkouts[index].reps } });
+    // New resistance PR has been set if either...
+    if ( weight > currentPR.weight ||                             // New weight > current PR's weight OR
+       (weight = currentPR.weight && reps > currentPR.reps)) {    // New weight = PR's weight but there were more reps
+      setPRs({
+        ...prs,
+        [exerciseName]: {
+          weight: newWorkouts[index].weight,
+          reps: newWorkouts[index].reps }
+      });
       newWorkouts[index].pr = true;
     } else {
       newWorkouts[index].pr = false;
@@ -229,8 +232,6 @@ function Logger({ route, navigation }){
 
     setWorkouts(newWorkouts);
   };
-
-
   
   return(
     // Structure very similar to stack navigation below
