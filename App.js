@@ -123,7 +123,7 @@ function Home({ navigation }){
           <TouchableOpacity
             key = {index}
             style = {styles.buttonContainer}
-            onPress = {() => navigation.navigate('Logger', { name: 'Logger' })}
+            onPress = {() => navigation.navigate('Logger', { fullDate: day.fullDate })}
           >
             <Dotw
               day = {day.dayOfWeek}
