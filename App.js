@@ -150,8 +150,11 @@ function Home({ navigation }){
 function Logger({ route, navigation }) {
   const { name, fullDate } = route.params;
 
-  // State variable workouts stores our exercises in an array
+  // State variable workouts stores our resistance exercises in an array
   const [workouts, setWorkouts] = useState([]);
+
+  // State variable cardio stores our cardio exercises in an array
+  const [cardios, setCardios] = useState([]);
 
   // Use state to track personal records (PRs)
   const [prs, setPRs] = useState({});
@@ -169,6 +172,18 @@ function Logger({ route, navigation }) {
       }
     };
 
+    const loadCardios = async () => {
+      try {
+        const storedCardios = await AsyncStorageUtils.getItem(`cardios-${fullDate}`);
+        if (storedCardios) {
+          setCardios(JSON.parse(storedCardios));          // Set to retrieved cardios
+        }
+      } catch (error) {
+        console.error('Failed to load cardios:', error);
+      }
+    };
+
+
     const loadPRs = async () => {
       try {
         const storedPRs = await AsyncStorageUtils.getItem('prs');
@@ -181,6 +196,7 @@ function Logger({ route, navigation }) {
     };
 
     loadWorkouts();
+    loadCardios();
     loadPRs();
   }, [fullDate]);
 
@@ -194,6 +210,14 @@ function Logger({ route, navigation }) {
       }
     };
 
+    const saveCardios = async () => {
+      try {
+        await AsyncStorageUtils.setItem(`cardios-${fullDate}`, JSON.stringify(cardios));
+      } catch (error) {
+        console.error('Failed to save cardios:', error);
+      }
+    };
+
     const savePRs = async () => {
       try {
         await AsyncStorageUtils.setItem('prs', JSON.stringify(prs));
@@ -203,12 +227,18 @@ function Logger({ route, navigation }) {
     };
 
     saveWorkouts();
+    saveCardios();
     savePRs();
-  }, [workouts, fullDate, prs]);
+  }, [workouts, cardios, fullDate, prs]);
 
   // Creates a new workout object (exerciseName, sets, reps, weight) to store in our array
   const addWorkout = () => {
     setWorkouts([...workouts, { exerciseName: '', sets: '', reps: '', weight: '' }]);
+  };
+
+  // Creates a new cardio object (cardioName, time, distance) to store in our array
+  const addCardio = () => {
+    setCardios([...cardios, { cardioName: '', time: '', distance: ''}]);
   };
 
   // Handles when a value in a workout object is changed
@@ -239,6 +269,13 @@ function Logger({ route, navigation }) {
 
     setWorkouts(newWorkouts);
   };
+
+  // Handles when a value in a cardio object is changed
+  const handleCardioChange = (index, field, value) => {
+    const newCardios = [...cardios];
+    newCardios[index][field] = value;
+    setCardios(newCardios);
+  }
 
   // Tab manager
   return (
@@ -296,9 +333,39 @@ function Logger({ route, navigation }) {
 
   function CardioScreen() {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Text>Cardio</Text>
-      </View>
+      <ScrollView>
+        {/* Adds a new workout; appends to our array a new exercise with blank values initialized */}
+        <TouchableOpacity style={styles.addWorkoutButton} onPress={addCardio}>
+          <Text style={{ fontSize: 36, textAlign: 'center' }}>+</Text>
+        </TouchableOpacity>
+        {/* Iterates over workouts array with the View below for each workout */}
+        {cardios.map((cardio, index) => (
+          <View key={index} style={styles.workoutEntry}>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter exercise name..."
+              value={cardio.cardioName}
+              onChangeText={(text) => handleCardioChange(index, 'cardioName', text)}
+            />
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+              <TextInput
+                style={[styles.input2, {width: '50%'}]}
+                placeholder="Time"
+                value={cardio.time}
+                onChangeText={(text) => handleCardioChange(index, 'time', text)}
+                keyboardType="numeric"
+              />
+              <TextInput
+                style={[styles.input2, {width: '50%'}]}
+                placeholder="Distance"
+                value={cardio.distance}
+                onChangeText={(text) => handleCardioChange(index, 'distance', text)}
+                keyboardType="numeric"
+              />
+            </View>
+          </View>
+        ))}
+      </ScrollView>
     );
   }
 }
