@@ -38,6 +38,7 @@ export default function App() {
           name="Home" 
           component={Home} 
           options={({ navigation }) => ({
+            headerStyle: { height: 100 },
             headerRight: () => (
               <TouchableOpacity style={styles.profileButton} onPress={() => navigation.navigate('Profile')}>
                 <View style={styles.profileCircle}></View>
@@ -280,6 +281,20 @@ function Logger({ route, navigation }) {
     setWorkouts(newWorkouts);
   };
 
+    // Deletes resistance workout entry
+  const deleteWorkout = (index) => {
+    const newWorkouts = [...workouts];
+    newWorkouts.splice(index, 1); 
+    setWorkouts(newWorkouts);
+  };
+
+  // Deletes cardio entry
+  const deleteCardio = (index) => {
+    const newCardios = [...cardios];
+    newCardios.splice(index, 1); 
+    setCardios(newCardios);
+  };
+
   // Handles when a value in a cardio object is changed
   const handleCardioChange = (index, field, value) => {
     const newCardios = [...cardios];
@@ -305,12 +320,18 @@ function Logger({ route, navigation }) {
         {/* Iterates over workouts array with the View below for each workout */}
         {workouts.map((workout, index) => (
           <View key={index} style={styles.workoutEntry}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { flex: 1 }]}
               placeholder="Enter exercise name..."
               value={workout.exerciseName}
               onChangeText={(text) => handleValueChange(index, 'exerciseName', text)}
             />
+            <TouchableOpacity style={styles.deleteButton} onPress={() => deleteWorkout(index)}>
+                <Text style={styles.deleteButtonText}>Remove</Text>
+            </TouchableOpacity>
+            </View>
+
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
               <TextInput
                 style={styles.input2}
@@ -351,12 +372,18 @@ function Logger({ route, navigation }) {
         {/* Iterates over workouts array with the View below for each workout */}
         {cardios.map((cardio, index) => (
           <View key={index} style={styles.workoutEntry}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { flex: 1 }]}
               placeholder="Enter exercise name..."
               value={cardio.cardioName}
               onChangeText={(text) => handleCardioChange(index, 'cardioName', text)}
             />
+            <TouchableOpacity style={styles.deleteButton} onPress={() => deleteCardio(index)}>
+                <Text style={styles.deleteButtonText}>Remove</Text>
+            </TouchableOpacity>
+            </View>
+
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
               <TextInput
                 style={[styles.input2, {width: '50%'}]}
@@ -467,12 +494,12 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginBottom: 10,
   },
-  profileButton: { // New style
+  profileButton: {
     position: 'absolute',
     right: 20,
     top: 20,
   },
-  profileCircle: { // New style
+  profileCircle: {
     width: 40,
     height: 40,
     borderRadius: 20,
@@ -480,9 +507,23 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  profileButtonText: { // New style
+  profileButtonText: {
     color: '#fff',
     fontSize: 24,
     textAlign: 'center',
+  }, 
+  deleteButton: {
+    backgroundColor: '#9e212e',
+    padding: 10,
+    borderWidth: 1,
+    borderRadius: 5,
+    marginBottom: 10,
+    marginLeft: 10,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  deleteButtonText: {
+    color: '#fff',
+    fontSize: 12
   }
 });
