@@ -34,8 +34,18 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Home">
-        <Stack.Screen name="Home" component={Home} />
+        <Stack.Screen 
+          name="Home" 
+          component={Home} 
+          options={({ navigation }) => ({
+            headerRight: () => (
+              <TouchableOpacity style={styles.profileButton} onPress={() => navigation.navigate('Profile')}>
+                <View style={styles.profileCircle}></View>
+              </TouchableOpacity>
+            ),
+          })} />
         <Stack.Screen name="Logger" component={Logger} />
+        <Stack.Screen name="Profile" component={Profile} />
       </Stack.Navigator>
     </NavigationContainer>
   );
@@ -372,6 +382,20 @@ function Logger({ route, navigation }) {
 
 /*
  * =================================================================================================
+ * PROFILE PAGE
+ * =================================================================================================
+ */
+
+const Profile = () => {
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>User Profile</Text>
+    </View>
+  );
+};
+
+/*
+ * =================================================================================================
  * STYLES
  * =================================================================================================
  */
@@ -385,7 +409,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
     alignItems: 'center',
-    paddingVertical: 0
+    paddingVertical: 15
   },
   header: {
     flexDirection: 'row',
@@ -442,5 +466,23 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     borderRadius: 5,
     marginBottom: 10,
+  },
+  profileButton: { // New style
+    position: 'absolute',
+    right: 20,
+    top: 20,
+  },
+  profileCircle: { // New style
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#a6a6a6',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  profileButtonText: { // New style
+    color: '#fff',
+    fontSize: 24,
+    textAlign: 'center',
   }
 });
