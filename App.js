@@ -8,10 +8,9 @@
 import React, { useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, TextInput } from 'react-native';
-import { startOfWeek, addDays, format } from 'date-fns';
+import { startOfWeek, addDays, format, parseISO } from 'date-fns';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 
 // Import components
@@ -20,7 +19,6 @@ import Dotw from './components/Dotw';
 // Import utilities
 import * as AsyncStorageUtils from './utils/AsyncStorage';
 
-
 /*
  * =================================================================================================
  * APP MANAGEMENT
@@ -28,7 +26,6 @@ import * as AsyncStorageUtils from './utils/AsyncStorage';
  */
 
 // Create the stack and tab navigators
-
 const Stack = createStackNavigator();
 const Tab = createMaterialTopTabNavigator();
 
@@ -415,6 +412,7 @@ function Logger({ route, navigation }) {
  * PROFILE PAGE
  * =================================================================================================
  */
+
 function Profile() {
   
   //for setting stuff
@@ -573,11 +571,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0f0f0',
   },
   input2: {
-    width: '100%',
-    fontSize: 50,
-    color: '#',
+    width: '30%',
     padding: 10,
-    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    marginBottom: 10,
   },
   profileButton: {
     position: 'absolute',
