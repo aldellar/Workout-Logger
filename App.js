@@ -311,6 +311,10 @@ function Logger({ route, navigation }) {
   );
 
   function ResistanceScreen() {
+    // Handles input currently being typed
+    const defaultCurrInput = {i: -1, t: ""};
+    const [currInput, setCurrInput] = useState(defaultCurrInput);
+
     return (
       <ScrollView>
         {/* Adds a new workout; appends to our array a new exercise with blank values initialized */}
@@ -318,14 +322,29 @@ function Logger({ route, navigation }) {
           <Text style={{ fontSize: 36, textAlign: 'center' }}>+</Text>
         </TouchableOpacity>
         {/* Iterates over workouts array with the View below for each workout */}
+        {/*
+          How input works so keyboard doesn't flicker
+          currInput: React State that acts as a buffer to type to
+          onFocus: When TextInput is first tapped, currInput is updated with the current
+          workout's index and text
+          onBlur: When TextInput is unfocused (user taps away from keyboard), value is updated
+          and rerendered
+          onChangeText: On every keystroke, currInput's text value is updated
+        */}
         {workouts.map((workout, index) => (
           <View key={index} style={styles.workoutEntry}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
             <TextInput
               style={[styles.input, { flex: 1 }]}
               placeholder="Enter exercise name..."
-              value={workout.exerciseName}
-              onChangeText={(text) => handleValueChange(index, 'exerciseName', text)}
+              value={index === currInput.i ? currInput.t : workout.exerciseName}
+              onFocus={() => setCurrInput({i: index, t: workout.exerciseName})}
+              onBlur={() => {
+                  handleValueChange(index, 'exerciseName', currInput.t);
+                  setCurrInput(defaultCurrInput);
+                }
+              }
+              onChangeText={(text) => setCurrInput({i: index, t: text})}
             />
             <TouchableOpacity style={styles.deleteButton} onPress={() => deleteWorkout(index)}>
                 <Text style={styles.deleteButtonText}>Remove</Text>
