@@ -8,9 +8,10 @@
 import React, { useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, TextInput } from 'react-native';
-import { startOfWeek, addDays, format, parseISO } from 'date-fns';
+import { startOfWeek, addDays, format } from 'date-fns';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
+
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 
 // Import components
@@ -19,6 +20,7 @@ import Dotw from './components/Dotw';
 // Import utilities
 import * as AsyncStorageUtils from './utils/AsyncStorage';
 
+
 /*
  * =================================================================================================
  * APP MANAGEMENT
@@ -26,6 +28,7 @@ import * as AsyncStorageUtils from './utils/AsyncStorage';
  */
 
 // Create the stack and tab navigators
+
 const Stack = createStackNavigator();
 const Tab = createMaterialTopTabNavigator();
 
@@ -412,14 +415,97 @@ function Logger({ route, navigation }) {
  * PROFILE PAGE
  * =================================================================================================
  */
+function Profile() {
+  
+  //for setting stuff
+  const [prs, setPRs] = useState({});
+  const [height, setHeight] = useState('');
+  const [weight, setWeight] = useState('');
+  const [age, setAge] = useState('');
+  const [name, setName] = useState('');
+  //loading profile from local storage
+  useEffect(() => {
+    const loadProfile = async () => {
+      //loading the stored data on the user when mounted
+      const storedHeight = await AsyncStorageUtils.getItem('height');
+      const storedWeight = await AsyncStorageUtils.getItem("weight");
+      const storedAge = await AsyncStorageUtils.getItem('age');
+      const storedName = await AsyncStorageUtils.getItem('name');
+      //validating we got an actual value and setting the value
+      if(storedAge) setAge(storedAge);
+      if(storedHeight) setHeight(storedHeight);
+      if(storedWeight) setWeight(storedWeight);
+      if(storedName) setName(storedName);
+    };
+    loadProfile();
 
-const Profile = () => {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>User Profile</Text>
-    </View>
+  }, );
+  useEffect(()=>{
+    const loadPRs = async () => {
+      try {
+        const storedPRs = await AsyncStorageUtils.getItem('prs');
+        if (storedPRs) {
+          setPRs(JSON.parse(storedPRs));                    // Set to retrieved PRs
+        }
+      } catch (error) {
+        console.error('Failed to load PRs:', error);
+      }
+    };
+
+    loadPRs();
+  }, [prs] );
+  //saving profile to local storage
+  useEffect(() =>{
+    const saveProfile = async () => {
+     
+      await AsyncStorageUtils.setItem('height', height);
+      await AsyncStorageUtils.setItem('weight', weight);
+      await AsyncStorageUtils.setItem('age', age);
+      await AsyncStorageUtils.setItem('name', name);
+    };
+
+    saveProfile();
+  }, [height,weight,age,name]);
+
+  
+  return(
+    <ScrollView style = {styles.profileContainer}>
+        <Text style= {styles.header}> Personal Information</Text>
+        <TextInput
+          placeholder = "Name"
+          value = {name}
+          onChangeText = {setName}
+          style={styles.input}
+          />
+        <TextInput
+          placeholder = "Weight"
+          value = {weight}
+          onChangeText = {setWeight}
+          style={styles.input}
+          />
+        <TextInput
+          placeholder = "Height"
+          value = {height}
+          onChangeText = {setHeight}
+          style={styles.input}
+          />
+
+        <TextInput
+          placeholder = "Age"
+          value = {age}
+          onChangeText = {setAge}
+          style= {styles.input}
+          />
+
+        <Text  style = {styles.header}> Resistance Personal Records </Text>
+        {prs && Object.keys(prs).map((exercise) => (
+        <View key={exercise}>
+          <Text style = {styles.input}>{`${exercise}: Weight - ${prs[exercise].weight}, Reps - ${prs[exercise].reps}`}</Text>
+        </View>
+      ))}
+    </ScrollView>
   );
-};
+}
 
 /*
  * =================================================================================================
@@ -487,12 +573,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0f0f0',
   },
   input2: {
-    width: '30%',
+    width: '100%',
+    fontSize: 50,
+    color: '#',
     padding: 10,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5,
-    marginBottom: 10,
+    marginBottom: 20,
   },
   profileButton: {
     position: 'absolute',
