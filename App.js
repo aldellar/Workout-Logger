@@ -409,6 +409,10 @@ function Logger({ route, navigation }) {
   }
 
   function CardioScreen() {
+    // Handles current input
+    const defaultCurrInput = {i: -1, t: "", f: ""};
+    const [currInput, setCurrInput] = useState(defaultCurrInput);
+
     return (
       <ScrollView>
         {/* Adds a new workout; appends to our array a new exercise with blank values initialized */}
@@ -422,8 +426,16 @@ function Logger({ route, navigation }) {
             <TextInput
               style={[styles.input, { flex: 1 }]}
               placeholder="Enter exercise name..."
-              value={cardio.cardioName}
-              onChangeText={(text) => handleCardioChange(index, 'cardioName', text)}
+              value={currInput.f === "name" && index === currInput.i ? currInput.t : cardio.cardioName}
+              onFocus={() => {
+                setCurrInput({i: index, t: cardio.cardioName, f: "name"});
+              }}
+              onBlur={() => {
+                  handleCardioChange(index, 'cardioName', currInput.t);
+                  setCurrInput(defaultCurrInput);
+                }
+              }
+              onChangeText={(text) => setCurrInput({i: index, t: text, f: "name"})}
             />
             <TouchableOpacity style={styles.deleteButton} onPress={() => deleteCardio(index)}>
                 <Text style={styles.deleteButtonText}>Remove</Text>
@@ -434,15 +446,31 @@ function Logger({ route, navigation }) {
               <TextInput
                 style={[styles.input2, {width: '50%'}]}
                 placeholder="Time"
-                value={cardio.time}
-                onChangeText={(text) => handleCardioChange(index, 'time', text)}
+                value={currInput.f === "time" && index === currInput.i ? currInput.t : cardio.time}
+                onFocus={() => {
+                  setCurrInput({i: index, t: cardio.time, f: "time"});
+                }}
+                onBlur={() => {
+                    handleCardioChange(index, 'time', currInput.t);
+                    setCurrInput(defaultCurrInput);
+                  }
+                }
+                onChangeText={(text) => setCurrInput({i: index, t: text, f: "time"})}
                 keyboardType="numeric"
               />
               <TextInput
                 style={[styles.input2, {width: '50%'}]}
                 placeholder="Distance"
-                value={cardio.distance}
-                onChangeText={(text) => handleCardioChange(index, 'distance', text)}
+                value={currInput.f === "distance" && index === currInput.i ? currInput.t : cardio.distance}
+                onFocus={() => {
+                  setCurrInput({i: index, t: cardio.distance, f: "distance"});
+                }}
+                onBlur={() => {
+                    handleCardioChange(index, 'distance', currInput.t);
+                    setCurrInput(defaultCurrInput);
+                  }
+                }
+                onChangeText={(text) => setCurrInput({i: index, t: text, f: "distance"})}
                 keyboardType="numeric"
               />
             </View>
