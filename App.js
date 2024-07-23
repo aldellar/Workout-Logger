@@ -248,9 +248,9 @@ function Logger({ route, navigation }) {
     setWorkouts([...workouts, { exerciseName: '', sets: '', reps: '', weight: '' }]);
   };
 
-  // Creates a new cardio object (cardioName, time, distance) to store in our array
+  // Function to add a new cardio entry
   const addCardio = () => {
-    setCardios([...cardios, { cardioName: '', time: '', distance: ''}]);
+    setCardios([...cardios, { cardioName: '', time: '', distance: '', unit: 'miles' }]);
   };
 
   // Handles when a value in a workout object is changed
@@ -280,6 +280,23 @@ function Logger({ route, navigation }) {
     }
 
     setWorkouts(newWorkouts);
+  };
+
+  // Handles time formatting for cardio section
+  const handleTime = (index, value, cardios, setCardios) => {
+    const formattedValue = value.replace(/[^0-9]/g, '').slice(0, 4); // Limit to 4 digits
+    let minutes = formattedValue.slice(0, 2);                        // First two digits = minutes
+    let seconds = formattedValue.slice(2, 4);                        // Second two digits =
+  
+    if (seconds && parseInt(seconds, 10) > 59) {
+      seconds = '59';
+    }
+  
+    const time = `${minutes}:${seconds}`;
+  
+    const newCardios = [...cardios];
+    newCardios[index].time = time;
+    setCardios(newCardios);
   };
 
   // Deletes resistance entry
@@ -410,18 +427,15 @@ function Logger({ route, navigation }) {
   }
 
   function CardioScreen() {
-    // Handles current input
-    const defaultCurrInput = {i: -1, t: "", f: ""};
+    const defaultCurrInput = { i: -1, t: "", f: "" };
     const [currInput, setCurrInput] = useState(defaultCurrInput);
-  
+
     return (
       <ScrollView>
-        {/* Adds a new workout; appends to our array a new exercise with blank values initialized */}
         <TouchableOpacity style={styles.addWorkoutButton} onPress={addCardio}>
           <Text style={{ fontSize: 36, textAlign: 'center' }}>+</Text>
         </TouchableOpacity>
-  
-        {/* Iterates over workouts array with the View below for each workout */}
+
         {cardios.map((cardio, index) => (
           <View key={index} style={styles.workoutEntry}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
@@ -430,71 +444,65 @@ function Logger({ route, navigation }) {
                 placeholder="Enter exercise name..."
                 value={currInput.f === "name" && index === currInput.i ? currInput.t : cardio.cardioName}
                 onFocus={() => {
-                  setCurrInput({i: index, t: cardio.cardioName, f: "name"});
+                  setCurrInput({ i: index, t: cardio.cardioName, f: "name" });
                 }}
                 onBlur={() => {
-                    handleCardioChange(index, 'cardioName', currInput.t);
-                    setCurrInput(defaultCurrInput);
-                  }
-                }
-                onChangeText={(text) => setCurrInput({i: index, t: text, f: "name"})}
+                  handleCardioChange(index, 'cardioName', currInput.t);
+                  setCurrInput(defaultCurrInput);
+                }}
+                onChangeText={(text) => setCurrInput({ i: index, t: text, f: "name" })}
               />
               <TouchableOpacity style={styles.deleteButton} onPress={() => deleteCardio(index)}>
                 <Text style={styles.deleteButtonText}>Remove</Text>
               </TouchableOpacity>
             </View>
-  
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
               <TextInput
-                style={[styles.input2, {width: '50%'}]}
-                placeholder="Time (Min:Sec)"
+                style={[styles.input2, { width: '30%' }]}
+                placeholder="MM:SS"
                 value={currInput.f === "time" && index === currInput.i ? currInput.t : cardio.time}
                 onFocus={() => {
-                  setCurrInput({i: index, t: cardio.time, f: "time"});
+                  setCurrInput({ i: index, t: cardio.time, f: "time" });
                 }}
                 onBlur={() => {
-                    handleCardioChange(index, 'time', currInput.t);
-                    setCurrInput(defaultCurrInput);
-                  }
-                }
-                onChangeText={(text) => setCurrInput({i: index, t: text, f: "time"})}
+                  handleTime(index, currInput.t, cardios, setCardios);
+                  setCurrInput(defaultCurrInput);
+                }}
+                onChangeText={(text) => setCurrInput({ i: index, t: text, f: "time" })}
                 keyboardType="numeric"
               />
-              <View style={{flexDirection: 'row', alignItems: 'center', width: '50%'}}>
-                <TextInput
-                  style={[styles.input2, {flex: 1}]}
-                  placeholder="Distance"
-                  value={currInput.f === "distance" && index === currInput.i ? currInput.t : cardio.distance}
-                  onFocus={() => {
-                    setCurrInput({i: index, t: cardio.distance, f: "distance"});
-                  }}
-                  onBlur={() => {
-                      handleCardioChange(index, 'distance', currInput.t);
-                      setCurrInput(defaultCurrInput);
-                    }
-                  }
-                  onChangeText={(text) => setCurrInput({i: index, t: text, f: "distance"})}
-                  keyboardType="numeric"
-                />
-                <RNPickerSelect
-                  onValueChange={(value) => handleCardioChange(index, 'unit', value)}
-                  items={[
-                    { label: 'Mi', value: 'miles' },
-                    { label: 'K', value: 'kilometers' },
-                    { label: 'M', value: 'meters' },
-                  ]}
-                  value={cardio.unit || 'miles'}
-                  style={pickerSelectStyles}
-                  useNativeAndroidPickerStyle={false}
-                />
-              </View>
+              <Text style={{ fontSize: 14, paddingRight: 20 }}>min</Text>
+              <TextInput
+                style={[styles.input2, { width: '30%' }]}
+                placeholder="Distance"
+                value={currInput.f === "distance" && index === currInput.i ? currInput.t : cardio.distance}
+                onFocus={() => {
+                  setCurrInput({ i: index, t: cardio.distance, f: "distance" });
+                }}
+                onBlur={() => {
+                  handleCardioChange(index, 'distance', currInput.t);
+                  setCurrInput(defaultCurrInput);
+                }}
+                onChangeText={(text) => setCurrInput({ i: index, t: text, f: "distance" })}
+                keyboardType="numeric"
+              />
+              <RNPickerSelect
+                onValueChange={(value) => handleCardioChange(index, 'unit', value)}
+                items={[
+                  { label: 'mi', value: 'miles' },
+                  { label: 'k', value: 'kilometers' },
+                  { label: 'm', value: 'meters' },
+                ]}
+                value={cardio.unit || 'miles'}
+                style={pickerSelectStyles}
+                useNativeAndroidPickerStyle={false}
+              />
             </View>
           </View>
         ))}
       </ScrollView>
     );
   }
-
 }
 
 /*
@@ -618,6 +626,7 @@ const styles = StyleSheet.create({
   }
 });
 
+// Style for the drop-down menu. Used in unit selection
 const pickerSelectStyles = StyleSheet.create({
   inputIOS: {
     height: 40,
