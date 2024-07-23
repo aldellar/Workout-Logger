@@ -399,7 +399,7 @@ function Logger({ route, navigation }) {
   
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
               <TextInput
-                style={[styles.input2, { flex: 1, marginRight: 10 }]}
+                style={[styles.input2, { flex: 1, marginRight: 5 }]}
                 placeholder="Sets"
                 value={currInput.f === "sets" && index === currInput.i ? currInput.t : workout.sets}
                 onFocus={() => {
@@ -412,8 +412,9 @@ function Logger({ route, navigation }) {
                 onChangeText={(text) => setCurrInput({i: index, t: text, f: "sets"})}
                 keyboardType="numeric"
               />
+              <Text style={{ fontSize: 14, paddingRight: 15 }}>sets</Text>
               <TextInput
-                style={[styles.input2, { flex: 1, marginRight: 10 }]}
+                style={[styles.input2, { flex: 1, marginRight: 5 }]}
                 placeholder="Reps"
                 value={currInput.f === "reps" && index === currInput.i ? currInput.t : workout.reps}
                 onFocus={() => {
@@ -426,10 +427,11 @@ function Logger({ route, navigation }) {
                 onChangeText={(text) => setCurrInput({i: index, t: text, f: "reps"})}
                 keyboardType="numeric"
               />
+              <Text style={{ fontSize: 14, paddingRight: 15 }}>reps</Text>
               <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1.5 }}>
                 <TextInput
                   style={[styles.input2, { flex: 1 }]}
-                  placeholder="Weight (lb)"
+                  placeholder="Weight"
                   value={currInput.f === "weight" && index === currInput.i ? currInput.t : workout.weight}
                   onFocus={() => {
                     setCurrInput({i: index, t: workout.weight, f: "weight"});
