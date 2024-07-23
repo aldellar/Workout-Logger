@@ -281,8 +281,8 @@ function Logger({ route, navigation }) {
     setWorkouts(newWorkouts);
   };
 
-    // Deletes resistance workout entry
-  const deleteWorkout = (index) => {
+    // Deletes resistance entry
+  const deleteResistance = (index) => {
     const newWorkouts = [...workouts];
     newWorkouts.splice(index, 1); 
     setWorkouts(newWorkouts);
@@ -349,7 +349,7 @@ function Logger({ route, navigation }) {
               }
               onChangeText={(text) => setCurrInput({i: index, t: text, f: "name"})}
             />
-            <TouchableOpacity style={styles.deleteButton} onPress={() => deleteWorkout(index)}>
+            <TouchableOpacity style={styles.deleteButton} onPress={() => deleteResistance(index)}>
                 <Text style={styles.deleteButtonText}>Remove</Text>
             </TouchableOpacity>
             </View>
