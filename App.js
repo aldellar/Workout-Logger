@@ -511,7 +511,7 @@ function Profile() {
       for (const key in keys) {
         const val = await AsyncStorageUtils.getItem(keys[key]);
         if (val) {
-          console.log("Found field: " + val);
+          // console.log("Found field: " + val);
           prevData[keys[key]] = val;
         }
       }
@@ -528,34 +528,34 @@ function Profile() {
         console.error('Failed to load PRs:', error);
       }
     }
-    console.log("Loading profile...");
+    // console.log("Loading profile...");
     loadProfile();
-    console.log("Profile loaded!");
-    console.log("Loading PRs...");
+    // console.log("Profile loaded!");
+    // console.log("Loading PRs...");
     loadPRs();
-    console.log("PRs loaded!")
+    // console.log("PRs loaded!")
   }, []);
 
   const saveProfile = async () => {
-    console.log("Saving profile...");
+    // console.log("Saving profile...");
     for (const key in keys) {
       if (profileData[keys[key]]) {
-        console.log(profileData[keys[key]]);
+        // console.log(profileData[keys[key]]);
         await AsyncStorageUtils.setItem(keys[key], profileData[keys[key]]);
       }
     }
-    console.log("Profile saved!");
+    // console.log("Profile saved!");
   };
 
   const handleProfileChange = (key, value) => {
-    console.log("Changing profile...");
+    // console.log("Changing profile...");
     setProfileData((prevProfile) => {
       if (value) prevProfile[key] = value;
       return prevProfile;
     });
-    console.log("New " + key + ": " + profileData[key]);
+    // console.log("New " + key + ": " + profileData[key]);
     saveProfile();
-    console.log("Profile changed!");
+    // console.log("Profile changed!");
   };
 
   return(
