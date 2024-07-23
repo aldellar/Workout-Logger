@@ -282,6 +282,41 @@ function Logger({ route, navigation }) {
     setWorkouts(newWorkouts);
   };
 
+  // Handles when a value in a cardio object is changed
+  const handleCardioChange = (index, field, value) => {
+    const newCardios = [...cardios];
+    newCardios[index][field] = value;
+  
+    const cardioName = newCardios[index].cardioName;
+    const distance = roundDistance(parseFloat(newCardios[index].distance));
+    const currentPR = prs[`${cardioName}-${distance}m`] || { time: '99:99' }; // Use a large default time to ensure any time is better
+  
+    const time = newCardios[index].time;
+  
+    // Convert time to minutes and seconds for comparison
+    const [currentMinutes, currentSeconds] = currentPR.time.split(':').map(Number);
+    const [newMinutes, newSeconds] = time.split(':').map(Number);
+  
+    const currentTotalSeconds = currentMinutes * 60 + currentSeconds;
+    const newTotalSeconds = newMinutes * 60 + newSeconds;
+  
+    // New cardio PR has been set if new time is less than current PR time
+    if (newTotalSeconds < currentTotalSeconds) {
+      setPRs({
+        ...prs,
+        [`${cardioName}-${distance}m`]: {
+          time: newCardios[index].time,
+          distance: newCardios[index].distance
+        }
+      });
+      newCardios[index].pr = true;
+    } else {
+      newCardios[index].pr = false;
+    }
+  
+    setCardios(newCardios);
+  };  
+
   // Handles time formatting for cardio section
   const handleTime = (index, value, cardios, setCardios) => {
     const formattedValue = value.replace(/[^0-9]/g, '').slice(0, 4); // Limit to 4 digits
@@ -299,6 +334,17 @@ function Logger({ route, navigation }) {
     setCardios(newCardios);
   };
 
+  // Rounding function
+  function roundDistance(distance) {
+    const integerPart = Math.floor(distance);
+    const decimalPart = distance - integerPart;
+    if (decimalPart >= 0.8) {
+      return integerPart + 1;
+    } else {
+      return integerPart;
+    }
+  };
+
   // Deletes resistance entry
   const deleteResistance = (index) => {
     const newWorkouts = [...workouts];
@@ -312,14 +358,7 @@ function Logger({ route, navigation }) {
     newCardios.splice(index, 1); 
     setCardios(newCardios);
   };
-
-  // Handles when a value in a cardio object is changed
-  const handleCardioChange = (index, field, value) => {
-    const newCardios = [...cardios];
-    newCardios[index][field] = value;
-    setCardios(newCardios);
-  }
-
+  
   // Tab manager
   return (
     <Tab.Navigator>
@@ -412,17 +451,16 @@ function Logger({ route, navigation }) {
     );
   }
   
-
   function CardioScreen() {
     const defaultCurrInput = { i: -1, t: "", f: "" };
     const [currInput, setCurrInput] = useState(defaultCurrInput);
-
+  
     return (
       <ScrollView>
         <TouchableOpacity style={styles.addWorkoutButton} onPress={addCardio}>
           <Text style={{ fontSize: 36, textAlign: 'center' }}>+</Text>
         </TouchableOpacity>
-
+  
         {cardios.map((cardio, index) => (
           <View key={index} style={styles.workoutEntry}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
@@ -445,7 +483,7 @@ function Logger({ route, navigation }) {
             </View>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
               <TextInput
-                style={[styles.input2, { flex : 0.8 }]}
+                style={[styles.input2, { flex: 0.8 }]}
                 placeholder="MM:SS"
                 value={currInput.f === "time" && index === currInput.i ? currInput.t : cardio.time}
                 onFocus={() => {
@@ -485,12 +523,14 @@ function Logger({ route, navigation }) {
                 useNativeAndroidPickerStyle={false}
               />
             </View>
+            {cardio.pr && <Text style={styles.prBadge}>𓆩🜲𓆪 PR set for {roundDistance(parseFloat(cardio.distance))} {cardio.unit}!</Text>}
           </View>
         ))}
       </ScrollView>
     );
   }
-}
+
+}  
 
 /*
  * =================================================================================================
