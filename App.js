@@ -447,7 +447,7 @@ function Logger({ route, navigation }) {
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
               <TextInput
                 style={[styles.input2, {width: '50%'}]}
-                placeholder="Time"
+                placeholder="Time (Min:Sec)"
                 value={currInput.f === "time" && index === currInput.i ? currInput.t : cardio.time}
                 onFocus={() => {
                   setCurrInput({i: index, t: cardio.time, f: "time"});
@@ -484,7 +484,8 @@ function Logger({ route, navigation }) {
                     { label: 'M', value: 'meters' },
                   ]}
                   value={cardio.unit || 'miles'}
-                  style={{ inputIOS: { width: 100 }, inputAndroid: { width: 100 } }}
+                  style={pickerSelectStyles}
+                  useNativeAndroidPickerStyle={false}
                 />
               </View>
             </View>
@@ -614,5 +615,28 @@ const styles = StyleSheet.create({
   deleteButtonText: {
     color: '#fff',
     fontSize: 12
+  }
+});
+
+const pickerSelectStyles = StyleSheet.create({
+  inputIOS: {
+    height: 40,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: '#cccccc',
+    borderRadius: 4,
+    color: 'black',
+    paddingRight: 30
+  },
+  inputAndroid: {
+    height: 40,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: '#cccccc',
+    borderRadius: 4,
+    color: 'black',
+    paddingRight: 30
   }
 });
