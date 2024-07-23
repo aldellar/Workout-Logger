@@ -487,13 +487,135 @@ function Logger({ route, navigation }) {
  * =================================================================================================
  */
 
-const Profile = () => {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>User Profile</Text>
-    </View>
+function Profile() {
+  
+  //for setting stuff
+  const [profileData, setProfileData] = useState({
+    "name": "",
+    "weight": "",
+    "height": "",
+    "age": ""
+  });
+  const [prs, setPRs] = useState({});
+  const keys = ["name", "weight", "height", "age"];
+
+  // Handles input currently being typed
+  // t: text buffer, f: field for profile (name, weight, etc)
+  const defaultCurrInput = {t: "", f: ""};
+  const [currInput, setCurrInput] = useState(defaultCurrInput);
+
+  //loading profile from local storage
+  useEffect(() => {
+    const loadProfile = async () => {
+      const prevData = { ...profileData };
+      for (const key in keys) {
+        const val = await AsyncStorageUtils.getItem(keys[key]);
+        if (val) {
+          // console.log("Found field: " + val);
+          prevData[keys[key]] = val;
+        }
+      }
+      setProfileData(prevData);
+    };
+
+    const loadPRs = async () => {
+      try {
+        const storedPRs = await AsyncStorageUtils.getItem('prs');
+        if (storedPRs) {
+          setPRs(JSON.parse(storedPRs));                    // Set to retrieved PRs
+        }
+      } catch (error) {
+        console.error('Failed to load PRs:', error);
+      }
+    }
+    // console.log("Loading profile...");
+    loadProfile();
+    // console.log("Profile loaded!");
+    // console.log("Loading PRs...");
+    loadPRs();
+    // console.log("PRs loaded!")
+  }, []);
+
+  const saveProfile = async () => {
+    // console.log("Saving profile...");
+    for (const key in keys) {
+      if (profileData[keys[key]]) {
+        // console.log(profileData[keys[key]]);
+        await AsyncStorageUtils.setItem(keys[key], profileData[keys[key]]);
+      }
+    }
+    // console.log("Profile saved!");
+  };
+
+  const handleProfileChange = (key, value) => {
+    // console.log("Changing profile...");
+    setProfileData((prevProfile) => {
+      if (value) prevProfile[key] = value;
+      return prevProfile;
+    });
+    // console.log("New " + key + ": " + profileData[key]);
+    saveProfile();
+    // console.log("Profile changed!");
+  };
+
+  return(
+    <ScrollView style = {styles.profileContainer}>
+        <Text style= {styles.header}> Personal Information</Text>
+        <TextInput
+          placeholder = "Name"
+          value={currInput.f === "name" ? currInput.t : profileData['name']}
+          onFocus={() => setCurrInput({t: profileData['name'], f: "name"})}
+          onBlur={() => {
+            handleProfileChange("name", currInput.t);
+            setCurrInput(defaultCurrInput);    
+          }}
+          onChangeText={(text) => setCurrInput({t: text, f: "name"})}
+          style={styles.input}
+          />
+        <TextInput
+          placeholder = "Weight"
+          value={currInput.f === "weight" ? currInput.t : profileData.weight}
+          onFocus={() => setCurrInput({t: profileData.weight, f: "weight"})}
+          onBlur={() => {
+            handleProfileChange("weight", currInput.t);
+            setCurrInput(defaultCurrInput);    
+          }}
+          onChangeText={(text) => setCurrInput({t: text, f: "weight"})}
+          style={styles.input}
+          />
+        <TextInput
+          placeholder = "Height"
+          value={currInput.f === "height" ? currInput.t : profileData.height}
+          onFocus={() => setCurrInput({t: profileData.height, f: "height"})}
+          onBlur={() => {
+            handleProfileChange("height", currInput.t);
+            setCurrInput(defaultCurrInput);    
+          }}
+          onChangeText={(text) => setCurrInput({t: text, f: "height"})}
+          style={styles.input}
+          />
+
+        <TextInput
+          placeholder = "Age"
+          value={currInput.f === "age" ? currInput.t : profileData.age}
+          onFocus={() => setCurrInput({t: profileData.age, f: "age"})}
+          onBlur={() => {
+            handleProfileChange("age", currInput.t);
+            setCurrInput(defaultCurrInput);    
+          }}
+          onChangeText={(text) => setCurrInput({t: text, f: "age"})}
+          style= {styles.input}
+          />
+
+        <Text  style = {styles.header}> Resistance Personal Records </Text>
+        {prs && Object.keys(prs).map((exercise) => (
+        <View key={exercise}>
+          <Text style = {styles.input}>{`${exercise}: Weight - ${prs[exercise].weight}, Reps - ${prs[exercise].reps}`}</Text>
+        </View>
+      ))}
+    </ScrollView>
   );
-};
+}
 
 /*
  * =================================================================================================

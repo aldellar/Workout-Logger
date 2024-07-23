@@ -9,10 +9,18 @@ Follow the instructions below to demo Train Easy using Expo Go.
 ### Dependencies
 
 - **React Native**: A framework for building native apps using React.
+  - Only required for building locally
 - **Node.js**: A JavaScript runtime required to run the app.
+  - Only required for building locally
 - **Expo Go**: An app for previewing React Native applications on your device.
 
-### Setup Instructions
+### Setup Instructions for downloading build artifact
+
+1. Navigate to the Train Easy build page on Expo Dashboard
+2. Click install
+3. Scan the QR code with your device to install the app!
+
+### Setup Instructions for building locally
 
 1. Download this repository to your local machine.
 2. Change to the directory where you cloned the repository.
