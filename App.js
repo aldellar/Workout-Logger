@@ -329,95 +329,81 @@ function Logger({ route, navigation }) {
   );
 
   function ResistanceScreen() {
-    // Handles input currently being typed
-    // i: index of workout, t: text buffer, f: field for workout (name, sets, etc)
     const defaultCurrInput = {i: -1, t: "", f: ""};
     const [currInput, setCurrInput] = useState(defaultCurrInput);
-
+  
     return (
       <ScrollView>
-        {/* Adds a new workout; appends to our array a new exercise with blank values initialized */}
         <TouchableOpacity style={styles.addWorkoutButton} onPress={addWorkout}>
           <Text style={{ fontSize: 36, textAlign: 'center' }}>+</Text>
         </TouchableOpacity>
-        {/* Iterates over workouts array with the View below for each workout */}
-        {/*
-          How input works so keyboard doesn't flicker
-          currInput: React State that acts as a buffer to type to
-          onFocus: When TextInput is first tapped, currInput is updated with the current
-          workout's index and text
-          onBlur: When TextInput is unfocused (user taps away from keyboard), value is updated
-          and rerendered
-          onChangeText: On every keystroke, currInput's text value is updated
-        */}
         {workouts.map((workout, index) => (
           <View key={index} style={styles.workoutEntry}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-            <TextInput
-              style={[styles.input, { flex: 1 }]}
-              placeholder="Enter exercise name..."
-              value={currInput.f === "name" && index === currInput.i ? currInput.t : workout.exerciseName}
-              onFocus={() => {
-                setCurrInput({i: index, t: workout.exerciseName, f: "name"});
-              }}
-              onBlur={() => {
+              <TextInput
+                style={[styles.input, { flex: 1 }]}
+                placeholder="Enter exercise name..."
+                value={currInput.f === "name" && index === currInput.i ? currInput.t : workout.exerciseName}
+                onFocus={() => {
+                  setCurrInput({i: index, t: workout.exerciseName, f: "name"});
+                }}
+                onBlur={() => {
                   handleValueChange(index, 'exerciseName', currInput.t);
                   setCurrInput(defaultCurrInput);
-                }
-              }
-              onChangeText={(text) => setCurrInput({i: index, t: text, f: "name"})}
-            />
-            <TouchableOpacity style={styles.deleteButton} onPress={() => deleteResistance(index)}>
+                }}
+                onChangeText={(text) => setCurrInput({i: index, t: text, f: "name"})}
+              />
+              <TouchableOpacity style={styles.deleteButton} onPress={() => deleteResistance(index)}>
                 <Text style={styles.deleteButtonText}>Remove</Text>
-            </TouchableOpacity>
+              </TouchableOpacity>
             </View>
-
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+  
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
               <TextInput
-                style={styles.input2}
+                style={[styles.input2, { flex: 1, marginRight: 10 }]}
                 placeholder="Sets"
                 value={currInput.f === "sets" && index === currInput.i ? currInput.t : workout.sets}
                 onFocus={() => {
                   setCurrInput({i: index, t: workout.sets, f: "sets"});
                 }}
                 onBlur={() => {
-                    handleValueChange(index, 'sets', currInput.t);
-                    setCurrInput(defaultCurrInput);
-                  }
-                }
+                  handleValueChange(index, 'sets', currInput.t);
+                  setCurrInput(defaultCurrInput);
+                }}
                 onChangeText={(text) => setCurrInput({i: index, t: text, f: "sets"})}
                 keyboardType="numeric"
               />
               <TextInput
-                style={styles.input2}
+                style={[styles.input2, { flex: 1, marginRight: 10 }]}
                 placeholder="Reps"
                 value={currInput.f === "reps" && index === currInput.i ? currInput.t : workout.reps}
                 onFocus={() => {
                   setCurrInput({i: index, t: workout.reps, f: "reps"});
                 }}
                 onBlur={() => {
-                    handleValueChange(index, 'reps', currInput.t);
-                    setCurrInput(defaultCurrInput);
-                  }
-                }
+                  handleValueChange(index, 'reps', currInput.t);
+                  setCurrInput(defaultCurrInput);
+                }}
                 onChangeText={(text) => setCurrInput({i: index, t: text, f: "reps"})}
                 keyboardType="numeric"
               />
-              <TextInput
-                style={styles.input2}
-                placeholder="Weight"
-                value={currInput.f === "weight" && index === currInput.i ? currInput.t : workout.weight}
-                onFocus={() => {
-                  setCurrInput({i: index, t: workout.weight, f: "weight"});
-                }}
-                onBlur={() => {
+              <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1.5 }}>
+                <TextInput
+                  style={[styles.input2, { flex: 1 }]}
+                  placeholder="Weight (lb)"
+                  value={currInput.f === "weight" && index === currInput.i ? currInput.t : workout.weight}
+                  onFocus={() => {
+                    setCurrInput({i: index, t: workout.weight, f: "weight"});
+                  }}
+                  onBlur={() => {
                     handleValueChange(index, 'weight', currInput.t);
                     setCurrInput(defaultCurrInput);
-                  }
-                }
-                onChangeText={(text) => setCurrInput({i: index, t: text, f: "weight"})}
-                keyboardType="numeric"
-              />
+                  }}
+                  onChangeText={(text) => setCurrInput({i: index, t: text, f: "weight"})}
+                  keyboardType="numeric"
+                />
+                <Text style={{ fontSize: 14, paddingLeft: 5 }}>lb</Text>
+              </View>
             </View>
             {workout.pr && <Text style={styles.prBadge}>𓆩🜲𓆪 PR set today!</Text>}
           </View>
@@ -425,6 +411,7 @@ function Logger({ route, navigation }) {
       </ScrollView>
     );
   }
+  
 
   function CardioScreen() {
     const defaultCurrInput = { i: -1, t: "", f: "" };
@@ -458,7 +445,7 @@ function Logger({ route, navigation }) {
             </View>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
               <TextInput
-                style={[styles.input2, { width: '30%' }]}
+                style={[styles.input2, { flex : 0.8 }]}
                 placeholder="MM:SS"
                 value={currInput.f === "time" && index === currInput.i ? currInput.t : cardio.time}
                 onFocus={() => {
@@ -636,6 +623,7 @@ const pickerSelectStyles = StyleSheet.create({
     borderColor: '#cccccc',
     borderRadius: 4,
     color: 'black',
+    paddingLeft: 5,
     paddingRight: 30
   },
   inputAndroid: {
@@ -646,6 +634,7 @@ const pickerSelectStyles = StyleSheet.create({
     borderColor: '#cccccc',
     borderRadius: 4,
     color: 'black',
+    paddingLeft: 5,
     paddingRight: 30
   }
 });
