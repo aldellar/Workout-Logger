@@ -12,6 +12,7 @@ import { startOfWeek, addDays, format, parseISO } from 'date-fns';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+import RNPickerSelect from 'react-native-picker-select';
 
 // Import components
 import Dotw from './components/Dotw';
@@ -247,13 +248,13 @@ function Logger({ route, navigation }) {
     setWorkouts([...workouts, { exerciseName: '', sets: '', reps: '', weight: '' }]);
   };
 
-  // Creates a new cardio object (cardioName, time, distance) to store in our array
+  // Function to add a new cardio entry
   const addCardio = () => {
-    setCardios([...cardios, { cardioName: '', time: '', distance: ''}]);
+    setCardios([...cardios, { cardioName: '', time: '', distance: '', unit: 'miles' }]);
   };
 
   // Handles when a value in a workout object is changed
-  const handleValueChange = (index, field, value) => {
+  const handleResistanceChange = (index, field, value) => {
     const newWorkouts = [...workouts];
     newWorkouts[index][field] = value;
 
@@ -281,8 +282,71 @@ function Logger({ route, navigation }) {
     setWorkouts(newWorkouts);
   };
 
-    // Deletes resistance workout entry
-  const deleteWorkout = (index) => {
+  // Handles when a value in a cardio object is changed
+  const handleCardioChange = (index, field, value) => {
+    const newCardios = [...cardios];
+    newCardios[index][field] = value;
+  
+    const cardioName = newCardios[index].cardioName;
+    const distance = roundDistance(parseFloat(newCardios[index].distance));
+    const currentPR = prs[`${cardioName}-${distance}m`] || { time: '99:99' }; // Use a large default time to ensure any time is better
+  
+    const time = newCardios[index].time;
+  
+    // Convert time to minutes and seconds for comparison
+    const [currentMinutes, currentSeconds] = currentPR.time.split(':').map(Number);
+    const [newMinutes, newSeconds] = time.split(':').map(Number);
+  
+    const currentTotalSeconds = currentMinutes * 60 + currentSeconds;
+    const newTotalSeconds = newMinutes * 60 + newSeconds;
+  
+    // New cardio PR has been set if new time is less than current PR time
+    if (newTotalSeconds < currentTotalSeconds) {
+      setPRs({
+        ...prs,
+        [`${cardioName}-${distance}m`]: {
+          time: newCardios[index].time,
+          distance: newCardios[index].distance
+        }
+      });
+      newCardios[index].pr = true;
+    } else {
+      newCardios[index].pr = false;
+    }
+  
+    setCardios(newCardios);
+  };  
+
+  // Handles time formatting for cardio section
+  const handleTime = (index, value, cardios, setCardios) => {
+    const formattedValue = value.replace(/[^0-9]/g, '').slice(0, 4); // Limit to 4 digits
+    let minutes = formattedValue.slice(0, 2);                        // First two digits = minutes
+    let seconds = formattedValue.slice(2, 4);                        // Second two digits =
+  
+    if (seconds && parseInt(seconds, 10) > 59) {
+      seconds = '59';
+    }
+  
+    const time = `${minutes}:${seconds}`;
+  
+    const newCardios = [...cardios];
+    newCardios[index].time = time;
+    setCardios(newCardios);
+  };
+
+  // Rounding function
+  function roundDistance(distance) {
+    const integerPart = Math.floor(distance);
+    const decimalPart = distance - integerPart;
+    if (decimalPart >= 0.8) {
+      return integerPart + 1;
+    } else {
+      return integerPart;
+    }
+  };
+
+  // Deletes resistance entry
+  const deleteResistance = (index) => {
     const newWorkouts = [...workouts];
     newWorkouts.splice(index, 1); 
     setWorkouts(newWorkouts);
@@ -294,14 +358,7 @@ function Logger({ route, navigation }) {
     newCardios.splice(index, 1); 
     setCardios(newCardios);
   };
-
-  // Handles when a value in a cardio object is changed
-  const handleCardioChange = (index, field, value) => {
-    const newCardios = [...cardios];
-    newCardios[index][field] = value;
-    setCardios(newCardios);
-  }
-
+  
   // Tab manager
   return (
     <Tab.Navigator>
@@ -311,175 +368,171 @@ function Logger({ route, navigation }) {
   );
 
   function ResistanceScreen() {
-    // Handles input currently being typed
-    // i: index of workout, t: text buffer, f: field for workout (name, sets, etc)
     const defaultCurrInput = {i: -1, t: "", f: ""};
     const [currInput, setCurrInput] = useState(defaultCurrInput);
-
+  
     return (
       <ScrollView>
-        {/* Adds a new workout; appends to our array a new exercise with blank values initialized */}
         <TouchableOpacity style={styles.addWorkoutButton} onPress={addWorkout}>
           <Text style={{ fontSize: 36, textAlign: 'center' }}>+</Text>
         </TouchableOpacity>
-        {/* Iterates over workouts array with the View below for each workout */}
-        {/*
-          How input works so keyboard doesn't flicker
-          currInput: React State that acts as a buffer to type to
-          onFocus: When TextInput is first tapped, currInput is updated with the current
-          workout's index and text
-          onBlur: When TextInput is unfocused (user taps away from keyboard), value is updated
-          and rerendered
-          onChangeText: On every keystroke, currInput's text value is updated
-        */}
         {workouts.map((workout, index) => (
           <View key={index} style={styles.workoutEntry}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-            <TextInput
-              style={[styles.input, { flex: 1 }]}
-              placeholder="Enter exercise name..."
-              value={currInput.f === "name" && index === currInput.i ? currInput.t : workout.exerciseName}
-              onFocus={() => {
-                setCurrInput({i: index, t: workout.exerciseName, f: "name"});
-              }}
-              onBlur={() => {
-                  handleValueChange(index, 'exerciseName', currInput.t);
-                  setCurrInput(defaultCurrInput);
-                }
-              }
-              onChangeText={(text) => setCurrInput({i: index, t: text, f: "name"})}
-            />
-            <TouchableOpacity style={styles.deleteButton} onPress={() => deleteWorkout(index)}>
-                <Text style={styles.deleteButtonText}>Remove</Text>
-            </TouchableOpacity>
-            </View>
-
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
               <TextInput
-                style={styles.input2}
+                style={[styles.input, { flex: 1 }]}
+                placeholder="Enter exercise name..."
+                value={currInput.f === "name" && index === currInput.i ? currInput.t : workout.exerciseName}
+                onFocus={() => {
+                  setCurrInput({i: index, t: workout.exerciseName, f: "name"});
+                }}
+                onBlur={() => {
+                  handleResistanceChange(index, 'exerciseName', currInput.t);
+                  setCurrInput(defaultCurrInput);
+                }}
+                onChangeText={(text) => setCurrInput({i: index, t: text, f: "name"})}
+              />
+              <TouchableOpacity style={styles.deleteButton} onPress={() => deleteResistance(index)}>
+                <Text style={styles.deleteButtonText}>Remove</Text>
+              </TouchableOpacity>
+            </View>
+  
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+              <TextInput
+                style={[styles.input2, { flex: 1, marginRight: 5 }]}
                 placeholder="Sets"
                 value={currInput.f === "sets" && index === currInput.i ? currInput.t : workout.sets}
                 onFocus={() => {
                   setCurrInput({i: index, t: workout.sets, f: "sets"});
                 }}
                 onBlur={() => {
-                    handleValueChange(index, 'sets', currInput.t);
-                    setCurrInput(defaultCurrInput);
-                  }
-                }
+                  handleResistanceChange(index, 'sets', currInput.t);
+                  setCurrInput(defaultCurrInput);
+                }}
                 onChangeText={(text) => setCurrInput({i: index, t: text, f: "sets"})}
                 keyboardType="numeric"
               />
+              <Text style={{ fontSize: 14, paddingRight: 15 }}>sets</Text>
               <TextInput
-                style={styles.input2}
+                style={[styles.input2, { flex: 1, marginRight: 5 }]}
                 placeholder="Reps"
                 value={currInput.f === "reps" && index === currInput.i ? currInput.t : workout.reps}
                 onFocus={() => {
                   setCurrInput({i: index, t: workout.reps, f: "reps"});
                 }}
                 onBlur={() => {
-                    handleValueChange(index, 'reps', currInput.t);
-                    setCurrInput(defaultCurrInput);
-                  }
-                }
+                  handleResistanceChange(index, 'reps', currInput.t);
+                  setCurrInput(defaultCurrInput);
+                }}
                 onChangeText={(text) => setCurrInput({i: index, t: text, f: "reps"})}
                 keyboardType="numeric"
               />
-              <TextInput
-                style={styles.input2}
-                placeholder="Weight"
-                value={currInput.f === "weight" && index === currInput.i ? currInput.t : workout.weight}
-                onFocus={() => {
-                  setCurrInput({i: index, t: workout.weight, f: "weight"});
-                }}
-                onBlur={() => {
-                    handleValueChange(index, 'weight', currInput.t);
+              <Text style={{ fontSize: 14, paddingRight: 15 }}>reps</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1.5 }}>
+                <TextInput
+                  style={[styles.input2, { flex: 1 }]}
+                  placeholder="Weight"
+                  value={currInput.f === "weight" && index === currInput.i ? currInput.t : workout.weight}
+                  onFocus={() => {
+                    setCurrInput({i: index, t: workout.weight, f: "weight"});
+                  }}
+                  onBlur={() => {
+                    handleResistanceChange(index, 'weight', currInput.t);
                     setCurrInput(defaultCurrInput);
-                  }
-                }
-                onChangeText={(text) => setCurrInput({i: index, t: text, f: "weight"})}
-                keyboardType="numeric"
-              />
+                  }}
+                  onChangeText={(text) => setCurrInput({i: index, t: text, f: "weight"})}
+                  keyboardType="numeric"
+                />
+                <Text style={{ fontSize: 14, paddingLeft: 5 }}>lb</Text>
+              </View>
             </View>
-            {workout.pr && <Text style={styles.prBadge}>PR!</Text>}
+            {workout.pr && <Text style={styles.prBadge}>𓆩🜲𓆪 PR set today!</Text>}
           </View>
         ))}
       </ScrollView>
     );
   }
-
+  
   function CardioScreen() {
-    // Handles current input
-    const defaultCurrInput = {i: -1, t: "", f: ""};
+    const defaultCurrInput = { i: -1, t: "", f: "" };
     const [currInput, setCurrInput] = useState(defaultCurrInput);
-
+  
     return (
       <ScrollView>
-        {/* Adds a new workout; appends to our array a new exercise with blank values initialized */}
         <TouchableOpacity style={styles.addWorkoutButton} onPress={addCardio}>
           <Text style={{ fontSize: 36, textAlign: 'center' }}>+</Text>
         </TouchableOpacity>
-        {/* Iterates over workouts array with the View below for each workout */}
+  
         {cardios.map((cardio, index) => (
           <View key={index} style={styles.workoutEntry}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-            <TextInput
-              style={[styles.input, { flex: 1 }]}
-              placeholder="Enter exercise name..."
-              value={currInput.f === "name" && index === currInput.i ? currInput.t : cardio.cardioName}
-              onFocus={() => {
-                setCurrInput({i: index, t: cardio.cardioName, f: "name"});
-              }}
-              onBlur={() => {
-                  handleCardioChange(index, 'cardioName', currInput.t);
-                  setCurrInput(defaultCurrInput);
-                }
-              }
-              onChangeText={(text) => setCurrInput({i: index, t: text, f: "name"})}
-            />
-            <TouchableOpacity style={styles.deleteButton} onPress={() => deleteCardio(index)}>
-                <Text style={styles.deleteButtonText}>Remove</Text>
-            </TouchableOpacity>
-            </View>
-
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
               <TextInput
-                style={[styles.input2, {width: '50%'}]}
-                placeholder="Time"
-                value={currInput.f === "time" && index === currInput.i ? currInput.t : cardio.time}
+                style={[styles.input, { flex: 1 }]}
+                placeholder="Enter exercise name..."
+                value={currInput.f === "name" && index === currInput.i ? currInput.t : cardio.cardioName}
                 onFocus={() => {
-                  setCurrInput({i: index, t: cardio.time, f: "time"});
+                  setCurrInput({ i: index, t: cardio.cardioName, f: "name" });
                 }}
                 onBlur={() => {
-                    handleCardioChange(index, 'time', currInput.t);
-                    setCurrInput(defaultCurrInput);
-                  }
-                }
-                onChangeText={(text) => setCurrInput({i: index, t: text, f: "time"})}
+                  handleCardioChange(index, 'cardioName', currInput.t);
+                  setCurrInput(defaultCurrInput);
+                }}
+                onChangeText={(text) => setCurrInput({ i: index, t: text, f: "name" })}
+              />
+              <TouchableOpacity style={styles.deleteButton} onPress={() => deleteCardio(index)}>
+                <Text style={styles.deleteButtonText}>Remove</Text>
+              </TouchableOpacity>
+            </View>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+              <TextInput
+                style={[styles.input2, { flex: 0.8 }]}
+                placeholder="MM:SS"
+                value={currInput.f === "time" && index === currInput.i ? currInput.t : cardio.time}
+                onFocus={() => {
+                  setCurrInput({ i: index, t: cardio.time, f: "time" });
+                }}
+                onBlur={() => {
+                  handleTime(index, currInput.t, cardios, setCardios);
+                  setCurrInput(defaultCurrInput);
+                }}
+                onChangeText={(text) => setCurrInput({ i: index, t: text, f: "time" })}
                 keyboardType="numeric"
               />
+              <Text style={{ fontSize: 14, paddingRight: 20 }}>min</Text>
               <TextInput
-                style={[styles.input2, {width: '50%'}]}
+                style={[styles.input2, { width: '30%' }]}
                 placeholder="Distance"
                 value={currInput.f === "distance" && index === currInput.i ? currInput.t : cardio.distance}
                 onFocus={() => {
-                  setCurrInput({i: index, t: cardio.distance, f: "distance"});
+                  setCurrInput({ i: index, t: cardio.distance, f: "distance" });
                 }}
                 onBlur={() => {
-                    handleCardioChange(index, 'distance', currInput.t);
-                    setCurrInput(defaultCurrInput);
-                  }
-                }
-                onChangeText={(text) => setCurrInput({i: index, t: text, f: "distance"})}
+                  handleCardioChange(index, 'distance', currInput.t);
+                  setCurrInput(defaultCurrInput);
+                }}
+                onChangeText={(text) => setCurrInput({ i: index, t: text, f: "distance" })}
                 keyboardType="numeric"
               />
+              <RNPickerSelect
+                onValueChange={(value) => handleCardioChange(index, 'unit', value)}
+                items={[
+                  { label: 'mi', value: 'miles' },
+                  { label: 'k', value: 'kilometers' },
+                  { label: 'm', value: 'meters' },
+                ]}
+                value={cardio.unit || 'miles'}
+                style={pickerSelectStyles}
+                useNativeAndroidPickerStyle={false}
+              />
             </View>
+            {cardio.pr && <Text style={styles.prBadge}>𓆩🜲𓆪 PR set for {roundDistance(parseFloat(cardio.distance))} {cardio.unit}!</Text>}
           </View>
         ))}
       </ScrollView>
     );
   }
-}
+
+}  
 
 /*
  * =================================================================================================
@@ -721,5 +774,31 @@ const styles = StyleSheet.create({
   deleteButtonText: {
     color: '#fff',
     fontSize: 12
+  }
+});
+
+// Style for the drop-down menu. Used in unit selection
+const pickerSelectStyles = StyleSheet.create({
+  inputIOS: {
+    height: 40,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: '#cccccc',
+    borderRadius: 4,
+    color: 'black',
+    paddingLeft: 5,
+    paddingRight: 30
+  },
+  inputAndroid: {
+    height: 40,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: '#cccccc',
+    borderRadius: 4,
+    color: 'black',
+    paddingLeft: 5,
+    paddingRight: 30
   }
 });
