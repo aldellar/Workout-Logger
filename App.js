@@ -401,7 +401,7 @@ function Logger({ route, navigation }) {
                 keyboardType="numeric"
               />
             </View>
-            {workout.pr && <Text style={styles.prBadge}>PR!</Text>}
+            {workout.pr && <Text style={styles.prBadge}>𓆩🜲𓆪 PR set today!</Text>}
           </View>
         ))}
       </ScrollView>
