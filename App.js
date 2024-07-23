@@ -256,17 +256,25 @@ function Logger({ route, navigation }) {
   // Handles when a value in a workout object is changed
   const handleResistanceChange = (index, field, value) => {
     const newWorkouts = [...workouts];
+    const oldExerciseName = newWorkouts[index].exerciseName;
+    const oldWeight = newWorkouts[index].weight;
+    const oldReps = newWorkouts[index].reps;
+    
     newWorkouts[index][field] = value;
-
     const exerciseName = newWorkouts[index].exerciseName;
-    const currentPR = prs[exerciseName] || { weight: 0, reps: 0 };
-
     const weight = parseInt(newWorkouts[index].weight, 10);
     const reps = parseInt(newWorkouts[index].reps, 10);
-
-    // New resistance PR has been set if either...
-    if (weight > currentPR.weight ||                             // New weight > current PR's weight OR
-       (weight === currentPR.weight && reps > currentPR.reps)) { // New weight = PR's weight but there were more reps
+    const currentPR = prs[exerciseName] || { weight: 0, reps: 0 };
+    
+    // Remove old PR if any of the relevant details changed
+    if (oldExerciseName !== exerciseName || oldWeight !== weight || oldReps !== reps) {
+      const updatedPRs = { ...prs };
+      delete updatedPRs[oldExerciseName];
+      setPRs(updatedPRs);
+    }
+    
+    // Check and update PR
+    if (weight > currentPR.weight || (weight === currentPR.weight && reps > currentPR.reps)) {
       setPRs({
         ...prs,
         [exerciseName]: {
@@ -275,38 +283,47 @@ function Logger({ route, navigation }) {
         }
       });
       newWorkouts[index].pr = true;
-    } else {
+      } else {
       newWorkouts[index].pr = false;
     }
-
+    
     setWorkouts(newWorkouts);
   };
-
+  
   // Handles when a value in a cardio object is changed
   const handleCardioChange = (index, field, value) => {
     const newCardios = [...cardios];
-    newCardios[index][field] = value;
+    const oldCardioName = newCardios[index].cardioName;
+    const oldDistance = roundDistance(parseFloat(newCardios[index].distance));
+    const oldTime = newCardios[index].time;
+    const oldUnit = newCardios[index].unit;
   
+    newCardios[index][field] = value;
     const cardioName = newCardios[index].cardioName;
     const distance = roundDistance(parseFloat(newCardios[index].distance));
-    const currentPR = prs[`${cardioName}-${distance}m`] || { time: '99:99' }; // Use a large default time to ensure any time is better
-  
     const time = newCardios[index].time;
+    const currentPR = prs[`${cardioName}-${distance}${newCardios[index].unit}`] || { time: '99:99' };
   
-    // Convert time to minutes and seconds for comparison
     const [currentMinutes, currentSeconds] = currentPR.time.split(':').map(Number);
     const [newMinutes, newSeconds] = time.split(':').map(Number);
-  
     const currentTotalSeconds = currentMinutes * 60 + currentSeconds;
     const newTotalSeconds = newMinutes * 60 + newSeconds;
   
-    // New cardio PR has been set if new time is less than current PR time
+    // Remove old PR if any of the relevant details changed
+    if (oldCardioName !== cardioName || oldDistance !== distance || oldTime !== time || oldUnit !== newCardios[index].unit) {
+      const updatedPRs = { ...prs };
+      delete updatedPRs[`${oldCardioName}-${oldDistance}${oldUnit}`];
+      setPRs(updatedPRs);
+    }
+  
+    // Check and update PR
     if (newTotalSeconds < currentTotalSeconds) {
       setPRs({
         ...prs,
-        [`${cardioName}-${distance}m`]: {
+        [`${cardioName}-${distance}${newCardios[index].unit}`]: {
           time: newCardios[index].time,
-          distance: newCardios[index].distance
+          distance: newCardios[index].distance,
+          unit: newCardios[index].unit
         }
       });
       newCardios[index].pr = true;
@@ -315,7 +332,8 @@ function Logger({ route, navigation }) {
     }
   
     setCardios(newCardios);
-  };  
+  };
+  
 
   // Handles time formatting for cardio section
   const handleTime = (index, value, cardios, setCardios) => {
@@ -348,16 +366,33 @@ function Logger({ route, navigation }) {
   // Deletes resistance entry
   const deleteResistance = (index) => {
     const newWorkouts = [...workouts];
-    newWorkouts.splice(index, 1); 
+    const exerciseName = newWorkouts[index].exerciseName;
+  
+    newWorkouts.splice(index, 1);
     setWorkouts(newWorkouts);
+  
+    // Remove PR if exercise is deleted
+    const updatedPRs = { ...prs };
+    delete updatedPRs[exerciseName];
+    setPRs(updatedPRs);
   };
-
-  // Deletes cardio entry
+  
+  // Delete cardio entry
   const deleteCardio = (index) => {
     const newCardios = [...cardios];
-    newCardios.splice(index, 1); 
+    const cardioName = newCardios[index].cardioName;
+    const distance = roundDistance(parseFloat(newCardios[index].distance));
+    const unit = newCardios[index].unit;
+  
+    newCardios.splice(index, 1);
     setCardios(newCardios);
+  
+    // Remove PR if cardio is deleted
+    const updatedPRs = { ...prs };
+    delete updatedPRs[`${cardioName}-${distance}${unit}`];
+    setPRs(updatedPRs);
   };
+  
   
   // Tab manager
   return (
