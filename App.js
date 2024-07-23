@@ -254,7 +254,7 @@ function Logger({ route, navigation }) {
   };
 
   // Handles when a value in a workout object is changed
-  const handleValueChange = (index, field, value) => {
+  const handleResistanceChange = (index, field, value) => {
     const newWorkouts = [...workouts];
     newWorkouts[index][field] = value;
 
@@ -348,7 +348,7 @@ function Logger({ route, navigation }) {
                   setCurrInput({i: index, t: workout.exerciseName, f: "name"});
                 }}
                 onBlur={() => {
-                  handleValueChange(index, 'exerciseName', currInput.t);
+                  handleResistanceChange(index, 'exerciseName', currInput.t);
                   setCurrInput(defaultCurrInput);
                 }}
                 onChangeText={(text) => setCurrInput({i: index, t: text, f: "name"})}
@@ -367,7 +367,7 @@ function Logger({ route, navigation }) {
                   setCurrInput({i: index, t: workout.sets, f: "sets"});
                 }}
                 onBlur={() => {
-                  handleValueChange(index, 'sets', currInput.t);
+                  handleResistanceChange(index, 'sets', currInput.t);
                   setCurrInput(defaultCurrInput);
                 }}
                 onChangeText={(text) => setCurrInput({i: index, t: text, f: "sets"})}
@@ -381,7 +381,7 @@ function Logger({ route, navigation }) {
                   setCurrInput({i: index, t: workout.reps, f: "reps"});
                 }}
                 onBlur={() => {
-                  handleValueChange(index, 'reps', currInput.t);
+                  handleResistanceChange(index, 'reps', currInput.t);
                   setCurrInput(defaultCurrInput);
                 }}
                 onChangeText={(text) => setCurrInput({i: index, t: text, f: "reps"})}
@@ -396,7 +396,7 @@ function Logger({ route, navigation }) {
                     setCurrInput({i: index, t: workout.weight, f: "weight"});
                   }}
                   onBlur={() => {
-                    handleValueChange(index, 'weight', currInput.t);
+                    handleResistanceChange(index, 'weight', currInput.t);
                     setCurrInput(defaultCurrInput);
                   }}
                   onChangeText={(text) => setCurrInput({i: index, t: text, f: "weight"})}
