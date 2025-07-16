@@ -1,9 +1,0 @@
-{
-  "background_color": "#ffffff",
-  "display": "standalone",
-  "lang": "en",
-  "name": "workout-logger",
-  "short_name": "workout-logger",
-  "start_url": "/?utm_source=web_app_manifest",
-  "orientation": "portrait"
-}
