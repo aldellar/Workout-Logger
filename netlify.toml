@@ -1,4 +1,0 @@
-# netlify.toml
-[build]
-  command = "echo 'Skipping build step...'"
-  publish = "web-build"
