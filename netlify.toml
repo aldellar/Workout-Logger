@@ -1,0 +1,4 @@
+# netlify.toml
+[build]
+  command = "npm install --legacy-peer-deps && npx expo export:web"
+  publish = "web-build"
