@@ -25,13 +25,10 @@
 
 - React
 - JavaScript (ES6+)
-- Material UI
 
 ### Backend
 
 - Node.js (minimal setup)
-- Express (if applicable)
-- Local development server for future API integration
 
 ---
 
@@ -44,20 +41,12 @@ git clone https://github.com/yourusername/workout-logger.git
 cd workout-logger
 ```
 
-### Frontend
+### Start
 
 ```bash
 cd frontend
 npm install
 npm start
-```
-
-### Backend (if applicable)
-
-```bash
-cd backend
-npm install
-node server.js
 ```
 
 > 🔒 Note: As of now, workout data is stored using the browser's `localStorage`. Backend services may be added in future versions.
